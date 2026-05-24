@@ -33,6 +33,20 @@
 
         <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
             <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Vistas</h3>
+                <div class="space-y-2">
+                    <button onclick="switchView('dashboard')" id="btn-view-dashboard" class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-50 text-indigo-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        Dashboard Principal
+                    </button>
+                    <button onclick="switchView('metrics')" id="btn-view-metrics" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        Métricas de Comportamiento
+                    </button>
+                </div>
+            </section>
+
+            <section>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Acciones</h3>
                 <label class="group cursor-pointer block">
                     <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 hover:border-indigo-500 p-6 rounded-2xl text-center transition-all">
@@ -146,7 +160,7 @@
                     <button onclick="openModal('graficoBar')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Monto por Impuesto (Bs)</h4>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Top 5 Contribuyentes (Bs)</h4>
                     <div class="chart-container"><canvas id="barChart"></canvas></div>
                 </div>
             </div>
@@ -184,6 +198,45 @@
                             <!-- Datos dinámicos -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- METRICS VIEW -->
+    <main id="view-metrics" class="flex-1 bg-slate-50/50 p-10 h-screen overflow-y-auto custom-scrollbar relative hidden">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <header class="flex items-end justify-between">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Métricas de Comportamiento</h2>
+                    <p class="text-slate-500 mt-1 font-medium">Análisis avanzado de tendencias y comportamientos de contribuyentes.</p>
+                </div>
+            </header>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- KPI 1 -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Transacciones Evaluadas</h4>
+                    <p id="kpiEvaluadas" class="text-3xl font-black text-slate-800">0</p>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-50 rounded-full"></div>
+                    <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1 relative z-10">Pagos A Tiempo</h4>
+                    <p id="kpiATiempo" class="text-3xl font-black text-emerald-700 relative z-10">0%</p>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-rose-50 rounded-full"></div>
+                    <h4 class="text-xs font-bold text-rose-600 uppercase tracking-widest mb-1 relative z-10">Pagos Retrasados</h4>
+                    <p id="kpiRetraso" class="text-3xl font-black text-rose-700 relative z-10">0%</p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Comportamiento por Terminal de RIF</h4>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="metricsBarChart"></canvas>
                 </div>
             </div>
         </div>
