@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Sistema de Recaudación</title>
+    
+    <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    
+    <!-- FUENTE INTER LOCAL -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    
+    <!-- ESTILOS PERSONALIZADOS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="flex min-h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-80 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30">
+        <div class="p-8 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-indigo-600">Control</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+            <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Acciones</h3>
+                <label class="group cursor-pointer block">
+                    <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 hover:border-indigo-500 p-6 rounded-2xl text-center transition-all">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-indigo-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        </div>
+                        <p class="text-sm font-bold text-indigo-900 leading-tight">Cargar nuevo CSV</p>
+                        <input type="file" id="csvFileInput" class="hidden" accept=".csv, .xlsx, .xls" multiple>
+                    </div>
+                </label>
+            </section>
+
+            <section class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Filtros</h3>
+                    <button onclick="clearFilters()" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest transition-colors cursor-pointer">Limpiar</button>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-600 italic">Dependencia:</label>
+                    <div id="dependencia-filters" class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-32 overflow-y-auto custom-scrollbar">
+                        <!-- Generado dinámicamente -->
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-600 italic">Impuesto:</label>
+                    <div id="impuesto-filters" class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-32 overflow-y-auto custom-scrollbar">
+                        <!-- Generado dinámicamente -->
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-600 italic">Terminal RIF (Último número):</label>
+                    <div class="grid grid-cols-5 gap-2 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="1" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">1</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">2</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">3</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">4</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">5</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">6</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">7</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="terminal-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="p-6 border-t border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs shadow-inner">AT</div>
+                <p class="text-xs font-bold text-slate-500 italic">Modo Operativo</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between shrink-0">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800">Visualización de Recaudación</h2>
+                <p id="fileStatusLabel" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Mostrando Datos de Ejemplo</p>
+            </div>
+            <button onclick="window.print()" class="text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar animate-in">
+            <!-- TARJETAS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
+                    <button onclick="openModal('contribuyentes')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contribuyentes</p>
+                    <h3 id="statCount" class="auto-text font-black text-slate-800">0</h3>
+                </div>
+                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-b-4 border-b-indigo-600 overflow-hidden relative">
+                    <button onclick="openModal('total')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Recaudado</p>
+                    <h3 id="statTotal" class="auto-text font-black text-indigo-700">Bs. 0,00</h3>
+                </div>
+                <div class="card-stat bg-white p-6 rounded-2xl border border-indigo-100 shadow-md overflow-hidden relative">
+                    <button onclick="openModal('terminal')" class="absolute top-3 right-3 text-indigo-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Terminal RIF (<span id="statDigit">0</span>)</p>
+                    <h3 id="statTerminal" class="auto-text font-black text-indigo-700">Bs. 0,00</h3>
+                </div>
+                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
+                    <button onclick="openModal('otros')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Otros Terminales</p>
+                    <h3 id="statOthers" class="auto-text font-black text-slate-800">Bs. 0,00</h3>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
+                    <button onclick="openModal('graficoPie')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Distribución de Impuestos (%)</h4>
+                    <div class="chart-container"><canvas id="pieChart"></canvas></div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
+                    <button onclick="openModal('graficoBar')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Monto por Impuesto (Bs)</h4>
+                    <div class="chart-container"><canvas id="barChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- TABLA -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-10">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h4 class="font-black text-xs text-slate-800 uppercase tracking-widest">Detalle de Contribuyentes</h4>
+                    <div class="w-full sm:w-72">
+                        <input type="text" id="tableSearch" placeholder="Buscar por Nombre, RIF..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none shadow-sm transition-all">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest">
+                            <tr>
+                                <th class="px-4 py-4 whitespace-nowrap">Cod. Forma</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Forma</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Cod. Dep.</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dependencia</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Cod. Banco</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Banco</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Tipo Doc.</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Impuesto</th>
+                                <th class="px-4 py-4 whitespace-nowrap">RIF</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Razón Social</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Período</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Núm. Doc.</th>
+                                <th class="px-4 py-4 whitespace-nowrap">RIF.1</th>
+                                <th class="px-4 py-4 whitespace-nowrap text-right">Monto (Bs)</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Fecha Rec.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100">
+                            <!-- Datos dinámicos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DETALLES -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Detalles</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="modalContent" class="p-6 overflow-y-auto flex-1">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

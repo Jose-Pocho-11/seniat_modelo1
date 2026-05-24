@@ -1,0 +1,56 @@
+:root {
+    --primary: #4338ca;
+    --bg-main: #f8fafc;
+}
+
+body { 
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+    background-color: var(--bg-main);
+}
+
+.custom-scrollbar::-webkit-scrollbar { 
+    width: 5px; 
+    height: 5px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: #f1f5f9; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: #cbd5e1; 
+    border-radius: 10px; 
+}
+
+.card-stat { 
+    transition: all 0.3s ease; 
+    container-type: inline-size;
+}
+
+.card-stat:hover { 
+    transform: translateY(-4px); 
+    box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1); 
+}
+
+.auto-text {
+    font-size: clamp(1.2rem, 10cqw, 1.875rem);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-container { 
+    position: relative; 
+    height: 300px; 
+    width: 100%; 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; } 
+    to { opacity: 1; } 
+}
+
+.animate-in { 
+    animation: fadeIn 0.5s ease forwards; 
+}
