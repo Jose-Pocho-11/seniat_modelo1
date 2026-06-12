@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Registrarse</title>
+    
+    <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    
+    <!-- FUENTE INTER LOCAL -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    
+        <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+    <!-- ESTILOS PERSONALIZADOS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Para efectos dinámicos -->
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .bg-login-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .bg-login-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse-bg 15s infinite linear;
+        }
+        @keyframes pulse-bg {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-login-gradient min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass-panel w-full max-w-3xl rounded-[2rem] p-8 shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500" style="zoom: 0.9;">
+        
+        <!-- HEADER / LOGO -->
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-24 mb-3 transform transition hover:scale-105">
+                <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-xl">
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tighter text-slate-800">Crear <span class="text-blue-600">Cuenta</span></h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Registro de Usuario</p>
+        </div>
+
+        <!-- FORMULARIO -->
+        <form id="registerForm" class="space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- NOMBRE -->
+                <div class="space-y-2 group">
+                    <label for="nombre" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+
+                <!-- APELLIDO -->
+                <div class="space-y-2 group">
+                    <label for="apellido" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Apellido</label>
+                    <input type="text" id="apellido" name="apellido" placeholder="Ej. Pérez" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+
+                <!-- CÉDULA -->
+                <div class="space-y-2 group">
+                    <label for="cedula" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Cédula</label>
+                    <input type="text" id="cedula" name="cedula" placeholder="Ej. 12345678" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+
+                <!-- CORREO -->
+                <div class="space-y-2 group">
+                    <label for="correo" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+
+                <!-- CONTRASEÑA -->
+                <div class="space-y-2 group">
+                    <label for="contrasena" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Contraseña</label>
+                    <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+            </div>
+
+            <hr class="border-slate-200 my-2">
+
+            <!-- PREGUNTAS DE SEGURIDAD -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- PREGUNTA 1 -->
+                <div class="space-y-2">
+                    <label for="pregunta_1_id" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Pregunta de Seguridad 1</label>
+                    <select id="pregunta_1_id" name="pregunta_1_id" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm appearance-none">
+                        <option value="" disabled selected>Seleccione una pregunta...</option>
+                        <option value="1">¿Cuál fue el nombre de tu primera mascota?</option>
+                        <option value="2">¿En qué ciudad naciste?</option>
+                        <option value="3">¿Cuál es tu color favorito?</option>
+                        <option value="4">¿Cuál es el segundo nombre de tu madre?</option>
+                    </select>
+                </div>
+
+                <!-- RESPUESTA 1 -->
+                <div class="space-y-2">
+                    <label for="respuesta_seguridad_1" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Respuesta 1</label>
+                    <input type="text" id="respuesta_seguridad_1" name="respuesta_seguridad_1" placeholder="Tu respuesta" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+
+                <!-- PREGUNTA 2 -->
+                <div class="space-y-2">
+                    <label for="pregunta_2_id" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Pregunta de Seguridad 2</label>
+                    <select id="pregunta_2_id" name="pregunta_2_id" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm appearance-none">
+                        <option value="" disabled selected>Seleccione una pregunta...</option>
+                        <option value="1">¿Cuál fue el nombre de tu primera mascota?</option>
+                        <option value="2">¿En qué ciudad naciste?</option>
+                        <option value="3">¿Cuál es tu color favorito?</option>
+                        <option value="4">¿Cuál es el segundo nombre de tu madre?</option>
+                    </select>
+                </div>
+
+                <!-- RESPUESTA 2 -->
+                <div class="space-y-2">
+                    <label for="respuesta_seguridad_2" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Respuesta 2</label>
+                    <input type="text" id="respuesta_seguridad_2" name="respuesta_seguridad_2" placeholder="Tu respuesta" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 px-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="pt-4 space-y-4">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-1 transition-all">
+                    Completar Registro
+                </button>
+                
+                <div class="text-center mt-4">
+                    <span class="text-sm font-bold text-slate-500">¿Ya tienes cuenta? </span>
+                    <a href="/login" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">Inicia sesión aquí</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerText = 'Cargando...';
+            
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    window.location.href = '/login?registered=1';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Registro',
+                        text: result.error,
+                        confirmButtonColor: '#ef4444'
+                    });
+                    btn.disabled = false;
+                    btn.innerText = 'Completar Registro';
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Conexión',
+                    text: 'No se pudo contactar al servidor.',
+                    confirmButtonColor: '#ef4444'
+                });
+                btn.disabled = false;
+                btn.innerText = 'Completar Registro';
+            }
+        });
+    </script>
+</body>
+</html>

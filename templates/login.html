@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Iniciar Sesión</title>
+    
+    <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    
+    <!-- FUENTE INTER LOCAL -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    
+        <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+    <!-- ESTILOS PERSONALIZADOS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Para efectos dinámicos en login -->
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .bg-login-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .bg-login-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse-bg 15s infinite linear;
+        }
+        @keyframes pulse-bg {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-login-gradient min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass-panel w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500">
+        
+        <!-- HEADER / LOGO -->
+        <div class="flex flex-col items-center mb-10">
+            <div class="w-32 mb-4 transform transition hover:scale-105">
+                <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-xl">
+            </div>
+            <h1 class="font-extrabold text-3xl tracking-tighter text-slate-800">Seniat <span class="text-blue-600">Control</span></h1>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Acceso al Sistema</p>
+        </div>
+
+        <!-- FORMULARIO -->
+        <form id="loginForm" class="space-y-6">
+            
+            <!-- CORREO -->
+            <div class="space-y-2 relative group">
+                <label for="correo" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                    <input type="email" id="correo" name="correo" placeholder="Ingresa tu correo" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+            </div>
+
+            <!-- CONTRASEÑA -->
+            <div class="space-y-2 relative group">
+                <label for="contrasena" class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Contraseña</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required
+                        class="w-full bg-white/50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                </div>
+            </div>
+
+            <!-- RECUPERAR CONTRASEÑA -->
+            <div class="flex items-center justify-end">
+                <a href="/recover" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="pt-2 space-y-4">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-1 transition-all">
+                    Iniciar Sesión
+                </button>
+                
+                <div class="relative flex items-center py-2">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase tracking-widest">O</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+                
+                <a href="/register" class="w-full block text-center bg-white hover:bg-slate-50 text-blue-600 border-2 border-blue-100 hover:border-blue-200 font-bold py-3.5 px-6 rounded-2xl shadow-sm transition-all">
+                    Registrarse
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        // Check if just registered
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('registered') === '1') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Registro exitoso!',
+                text: 'Ya puedes iniciar sesión en el sistema.',
+                confirmButtonColor: '#2563eb'
+            });
+            // Limpiar URL para no mostrarlo de nuevo al recargar
+            window.history.replaceState({}, document.title, "/login");
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerText = 'Cargando...';
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    window.location.href = '/';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Acceso',
+                        text: result.error || 'Correo o contraseña incorrectos.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    btn.disabled = false;
+                    btn.innerText = 'Iniciar Sesión';
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Conexión',
+                    text: 'No se pudo contactar al servidor.',
+                    confirmButtonColor: '#ef4444'
+                });
+                btn.disabled = false;
+                btn.innerText = 'Iniciar Sesión';
+            }
+        });
+    </script>
+</body>
+</html>

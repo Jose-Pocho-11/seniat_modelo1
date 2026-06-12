@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Directorio de Contribuyentes</title>
+    
+    <!-- LIBRERÍAS LOCALES -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="flex min-h-screen overflow-hidden bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
+        <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+        <div class="p-8 border-b border-slate-100">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-24">
+                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-blue-600">Control</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+            <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Vistas</h3>
+                <div class="space-y-2">
+                    <a href="/" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        Dashboard Principal
+                    </a>
+                    <a href="/metricas" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        Métricas de Comportamiento
+                    </a>
+                    <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 text-blue-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Directorio
+                    </a>
+                    <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Historial de Lotes
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+                    {{ current_user[0] if current_user else 'U' }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+                </div>
+            </div>
+            <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </a>
+        </div>
+    </aside>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const resizer = document.getElementById('resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            if (newWidth < 200) newWidth = 200;
+            if (newWidth > 800) newWidth = 800;
+            sidebar.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+            }
+        });
+    </script>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between shrink-0">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800">Directorio de Contribuyentes</h2>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Base de Datos General</p>
+            </div>
+            <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Nuevo Contribuyente
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-10 space-y-6 custom-scrollbar animate-in">
+            <!-- BUSCADOR -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" onkeyup="searchContribuyentes()" placeholder="Buscar por RIF o Razón Social..." class="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors">
+                </div>
+            </div>
+
+            
+
+            <!-- FILTROS AVANZADOS -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Filtros Avanzados</h3>
+                    <button onclick="limpiarFiltros()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors px-3 py-1 bg-blue-50 rounded-lg">Limpiar Filtros</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <!-- Filtro Dependencia -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Dependencia</label>
+                        <button type="button" onclick="toggleDropdown('menuDependencia')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left flex justify-between items-center transition-colors hover:bg-slate-100">
+                            <span id="labelDependencia" class="truncate text-slate-600">Todas</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="menuDependencia" class="hidden absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                            <!-- JS injects checkboxes -->
+                        </div>
+                    </div>
+                    <!-- Filtro Impuesto -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Impuesto</label>
+                        <button type="button" onclick="toggleDropdown('menuImpuesto')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left flex justify-between items-center transition-colors hover:bg-slate-100">
+                            <span id="labelImpuesto" class="truncate text-slate-600">Todos</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="menuImpuesto" class="hidden absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                            <!-- JS injects checkboxes -->
+                        </div>
+                    </div>
+                    <!-- Filtro Banco -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Banco</label>
+                        <button type="button" onclick="toggleDropdown('menuBanco')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left flex justify-between items-center transition-colors hover:bg-slate-100">
+                            <span id="labelBanco" class="truncate text-slate-600">Todos</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="menuBanco" class="hidden absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                        </div>
+                    </div>
+                    <!-- Filtro Documento -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Tipo de Documento</label>
+                        <button type="button" onclick="toggleDropdown('menuDocumento')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left flex justify-between items-center transition-colors hover:bg-slate-100">
+                            <span id="labelDocumento" class="truncate text-slate-600">Todos</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="menuDocumento" class="hidden absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                        </div>
+                    </div>
+                    <!-- Filtro Terminal RIF -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Terminal RIF</label>
+                        <button type="button" onclick="toggleDropdown('menuTerminal')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left flex justify-between items-center transition-colors hover:bg-slate-100">
+                            <span id="labelTerminal" class="truncate text-slate-600">Cualquiera</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="menuTerminal" class="hidden absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                            <!-- JS injects 0-9 options -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Fecha Desde</label>
+                        <input type="date" id="filterFechaDesde" onchange="searchContribuyentes()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Fecha Hasta</label>
+                        <input type="date" id="filterFechaHasta" onchange="searchContribuyentes()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULTADOS -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest">
+                            <tr>
+                                <th class="px-4 py-4 whitespace-nowrap">Código Forma</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Forma</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Código Dependencia</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dependencia</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Código Banco</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Banco</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Tipo de Documento</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Impuesto</th>
+                                <th class="px-4 py-4 whitespace-nowrap">RIF Retenedor</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Razón Social</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Periodo</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Número de Documento</th>
+                                <th class="px-4 py-4 whitespace-nowrap">RIF Contribuyente</th>
+                                <th class="px-4 py-4 whitespace-nowrap text-right">Monto</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Fecha de Recaudación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directoryBody" class="divide-y divide-slate-100">
+                            <!-- JS inyectará los datos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL AGREGAR CONTRIBUYENTE -->
+    <div id="addModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Registrar Contribuyente</h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form id="addForm" onsubmit="submitContribuyente(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">RIF <span class="text-red-500">*</span></label>
+                    <input type="text" id="addRif" required placeholder="J-12345678-9" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Razón Social <span class="text-red-500">*</span></label>
+                    <input type="text" id="addNombre" required placeholder="Empresa C.A." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Teléfono</label>
+                    <input type="text" id="addTelefono" placeholder="0414-0000000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Email</label>
+                    <input type="email" id="addEmail" placeholder="contacto@empresa.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dirección</label>
+                    <input type="text" id="addDireccion" placeholder="Av. Principal..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let searchTimeout = null;
+
+        function toggleDropdown(menuId) {
+            const menu = document.getElementById(menuId);
+            const isHidden = menu.classList.contains('hidden');
+            
+            // Cerrar todos los menus primero
+            document.querySelectorAll('div[id^="menu"]').forEach(el => el.classList.add('hidden'));
+            
+            if (isHidden) {
+                menu.classList.remove('hidden');
+            }
+        }
+
+        // Cerrar menús al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.relative')) {
+                document.querySelectorAll('div[id^="menu"]').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
+        function handleCheckboxChange(filterId, labelId, defaultText) {
+            const checked = Array.from(document.querySelectorAll(`input[name="${filterId}"]:checked`)).map(el => el.value);
+            const label = document.getElementById(labelId);
+            if (checked.length === 0) {
+                label.textContent = defaultText;
+            } else if (checked.length === 1) {
+                label.textContent = checked[0];
+            } else {
+                label.textContent = `${checked.length} seleccionados`;
+            }
+            searchContribuyentes();
+        }
+
+        function createCheckboxItem(value, filterId, labelId, defaultText) {
+            const label = document.createElement('label');
+            label.className = "flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors";
+            label.innerHTML = `
+                <input type="checkbox" name="${filterId}" value="${value}" onchange="handleCheckboxChange('${filterId}', '${labelId}', '${defaultText}')" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                <span class="text-sm text-slate-700">${value}</span>
+            `;
+            return label;
+        }
+
+        function cargarFiltros() {
+            fetch('/api/filtros_opciones')
+                .then(res => res.json())
+                .then(data => {
+                    const populateMenu = (menuId, filterId, labelId, defaultText, list) => {
+                        const menu = document.getElementById(menuId);
+                        menu.innerHTML = '';
+                        list.forEach(item => {
+                            menu.appendChild(createCheckboxItem(item, filterId, labelId, defaultText));
+                        });
+                    };
+                    populateMenu('menuDependencia', 'chkDependencia', 'labelDependencia', 'Todas', data.dependencias);
+                    populateMenu('menuImpuesto', 'chkImpuesto', 'labelImpuesto', 'Todos', data.impuestos);
+                    populateMenu('menuBanco', 'chkBanco', 'labelBanco', 'Todos', data.bancos);
+                    populateMenu('menuDocumento', 'chkDocumento', 'labelDocumento', 'Todos', data.documentos);
+                    
+                    // Llenar terminal RIF del 0 al 9
+                    const terminales = ['0','1','2','3','4','5','6','7','8','9'];
+                    populateMenu('menuTerminal', 'chkTerminal', 'labelTerminal', 'Cualquiera', terminales);
+                })
+                .catch(err => console.error(err));
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('searchInput').value = '';
+            
+            document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+            document.getElementById('labelDependencia').textContent = 'Todas';
+            document.getElementById('labelImpuesto').textContent = 'Todos';
+            document.getElementById('labelBanco').textContent = 'Todos';
+            document.getElementById('labelDocumento').textContent = 'Todos';
+            document.getElementById('labelTerminal').textContent = 'Cualquiera';
+            
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            
+            searchContribuyentes();
+        }
+
+        function searchContribuyentes() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = document.getElementById('searchInput').value;
+                const getCheckedValues = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+                
+                const dependencia = getCheckedValues('chkDependencia');
+                const impuesto = getCheckedValues('chkImpuesto');
+                const banco = getCheckedValues('chkBanco');
+                const documento = getCheckedValues('chkDocumento');
+                const terminal = getCheckedValues('chkTerminal');
+                const desde = document.getElementById('filterFechaDesde').value;
+                const hasta = document.getElementById('filterFechaHasta').value;
+                
+                const params = new URLSearchParams();
+                if (query) params.append('q', query);
+                dependencia.forEach(v => params.append('dependencia', v));
+                impuesto.forEach(v => params.append('impuesto', v));
+                banco.forEach(v => params.append('banco', v));
+                documento.forEach(v => params.append('tipo_documento', v));
+                terminal.forEach(v => params.append('terminal_rif', v));
+                if (desde) params.append('fecha_desde', desde);
+                if (hasta) params.append('fecha_hasta', hasta);
+
+                fetch(`/api/contribuyentes?${params.toString()}`)
+                    .then(res => res.json())
+                    .then(data => renderTable(data))
+                    .catch(err => console.error("Error fetching data:", err));
+            }, 300);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('directoryBody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" class="px-6 py-8 text-center text-slate-500 italic">No se encontraron registros</td></tr>`;
+                return;
+            }
+
+            const format = (val) => new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Forma'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${row['Forma'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Dependencia'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Dependencia'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Banco'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Banco'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Tipo de Documento'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-400 uppercase text-[10px]">${row['Impuesto'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${row['RIF Retenedor'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${row['Razón Social'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Periodo'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Número de Documento'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${row['RIF Contribuyente'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-right font-black text-slate-800">${format(row['Monto'] || 0)}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Fecha de Recaudación'] || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('flex');
+            document.getElementById('addForm').reset();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('addModal').classList.remove('flex');
+        }
+
+        async function submitContribuyente(e) {
+            e.preventDefault();
+            const data = {
+                rif: document.getElementById('addRif').value,
+                razon_social: document.getElementById('addNombre').value,
+                telefono: document.getElementById('addTelefono').value,
+                email: document.getElementById('addEmail').value,
+                direccion: document.getElementById('addDireccion').value,
+            };
+
+            try {
+                const res = await fetch('/api/contribuyentes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    closeAddModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Contribuyente Agregado',
+                        text: 'El contribuyente ha sido creado exitosamente.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    cargarFiltros();
+                    searchContribuyentes(); // Recargar tabla
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.error,
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Conexión',
+                    text: 'No se pudo contactar al servidor.',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        }
+
+                // Cargar datos iniciales
+        window.onload = () => {
+            cargarFiltros();
+            searchContribuyentes();
+            
+        };
+    </script>
+</body>
+</html>

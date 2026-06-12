@@ -31,8 +31,31 @@ def process_files(file_list):
         for file_obj in file_list:
             filename = file_obj.filename.lower()
             
-            # El usuario indicó que los datos empiezan en la fila 6 (skiprows=5) y no tienen encabezado.
-            # Asignamos manualmente los nombres de las columnas que nos proporcionó.
+            # Leemos sin encabezado para buscar la fila de datos dinámicamente
+            if filename.endswith('.csv'):
+                df = pd.read_csv(file_obj, header=None)
+            elif filename.endswith(('.xlsx', '.xls')):
+                df = pd.read_excel(file_obj, header=None)
+            else:
+                continue
+                
+            # Buscar dinámicamente la fila de encabezados
+            header_idx = -1
+            for i in range(min(20, len(df))):
+                row_str = ' '.join([str(x).lower() for x in df.iloc[i].values if pd.notna(x)])
+                # Buscar palabras clave típicas de los encabezados de estos reportes
+                if 'forma' in row_str and 'monto' in row_str and 'rif' in row_str:
+                    header_idx = i
+                    break
+                    
+            if header_idx != -1:
+                # Recortar el dataframe para que empiece en la primera fila de datos reales
+                df = df.iloc[header_idx + 1:].reset_index(drop=True)
+            else:
+                return {"error": f"Estructura inválida en el archivo '{filename}'. No se encontraron los encabezados esperados."}, 400
+                
+            # Asignar nombres de columnas estandarizados para que el frontend no se rompa
+            # El frontend espera exactamente estos nombres
             column_names = [
                 "Código Forma", "Forma", "Código Dependencia", "Dependencia", 
                 "Código Banco", "Banco", "Tipo de Documento", "Impuesto", 
@@ -40,19 +63,11 @@ def process_files(file_list):
                 "RIF.1", "Monto", "Fechas de Recaudación"
             ]
             
-            if filename.endswith('.csv'):
-                df = pd.read_csv(file_obj, skiprows=4, header=None, names=column_names)
-            elif filename.endswith(('.xlsx', '.xls')):
-                df = pd.read_excel(file_obj, skiprows=4, header=None, names=column_names)
+            # Validar que el archivo tenga exactamente 15 columnas
+            if len(df.columns) == 15:
+                df.columns = column_names
             else:
-                continue
-                
-            # Limpiar nombres de columnas convirtiéndolos a string (evita errores con columnas vacías leídas como NaN/float)
-            df.columns = df.columns.astype(str).str.strip()
-            
-            # Manejar el caso de que haya múltiples columnas "RIF" 
-            # Pandas normalmente renombra duplicados a "RIF", "RIF.1", etc.
-            # No necesitamos hacer nada especial si usamos el primer RIF.
+                return {"error": f"Estructura inválida en el archivo '{filename}'. Se esperaban 15 columnas, pero el archivo tiene {len(df.columns)} columnas."}, 400
             
             with open('debug_log.txt', 'w', encoding='utf-8') as f:
                 f.write("Columnas detectadas:\n")
@@ -89,6 +104,11 @@ def process_files(file_list):
         # Convertir a lista de diccionarios
         data = combined_df.to_dict(orient='records')
         
+        # Save to cache file for multi-page persistence
+        import json
+        with open('data_cache.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f)
+            
         with open('debug_log2.txt', 'w', encoding='utf-8') as f:
             f.write("Primeros 2 registros a enviar al navegador:\n")
             f.write(str(data[:2]) + "\n")

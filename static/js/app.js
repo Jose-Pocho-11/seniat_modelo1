@@ -86,34 +86,26 @@ function checkCompliance(rifStr, periodoStr, fechaPagoStr) {
     return dPago.getTime() <= dueDate.getTime();
 }
 
-function switchView(viewName) {
-    document.getElementById('view-dashboard').classList.add('hidden');
-    document.getElementById('view-metrics').classList.add('hidden');
-    
-    const btnDash = document.getElementById('btn-view-dashboard');
-    const btnMetr = document.getElementById('btn-view-metrics');
-    
-    btnDash.className = "w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all";
-    btnMetr.className = "w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all";
-
-    if (viewName === 'dashboard') {
-        document.getElementById('view-dashboard').classList.remove('hidden');
-        btnDash.className = "w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-50 text-indigo-700 font-bold transition-all";
-    } else if (viewName === 'metrics') {
-        document.getElementById('view-metrics').classList.remove('hidden');
-        btnMetr.className = "w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-50 text-indigo-700 font-bold transition-all";
-    }
-}
+// Navigation is now handled via multi-page routing in Flask
 
 function updateUI() {
     const terminalSelected = getCheckedValues('.terminal-checkbox');
-    const search = document.getElementById('tableSearch').value.toLowerCase();
+    const search = document.getElementById('tableSearch') ? document.getElementById('tableSearch').value.toLowerCase() : '';
     const dependenciaSelected = getCheckedValues('.dependencia-checkbox');
     const impuestoSelected = getCheckedValues('.impuesto-checkbox');
-    document.getElementById('statDigit').textContent = terminalSelected.join(', ') || 'Ninguno';
+    
+    const statDigit = document.getElementById('statDigit');
+    if (statDigit) statDigit.textContent = terminalSelected.join(', ') || 'Ninguno';
+
+    // Filtros específicos de métricas
+    const metricYear = document.getElementById('metricYear') ? document.getElementById('metricYear').value : '';
+    const metricMonth = document.getElementById('metricMonth') ? document.getElementById('metricMonth').value : '';
+    const metricTerminals = document.querySelectorAll('.metric-terminal').length > 0 
+        ? getCheckedValues('.metric-terminal') 
+        : ['0','1','2','3','4','5','6','7','8','9'];
 
     let stats = { 
-        total: 0, term: 0, groups: {}, visible: 0, uniqueRifs: new Set(), topContrib: {},
+        total: 0, term: 0, groups: {}, visible: 0, uniqueRifs: new Set(), topTerminals: {},
         compliance: {
             evaluadas: 0, aTiempo: 0, retraso: 0,
             byTerminal: {
@@ -126,7 +118,7 @@ function updateUI() {
         }
     };
     const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
+    if (tbody) tbody.innerHTML = '';
 
     appData.forEach(row => {
         const nombre = row['Razón Social'] || 'N/A';
@@ -145,10 +137,11 @@ function updateUI() {
         const codBanco = row['Código Banco'] || '';
         const banco = row['Banco'] || '';
         const tipoDoc = row['Tipo de Documento'] || '';
-        const periodo = row['Período'] || '';
+        const periodo = row['Período'] || row['Periodo'] || '';
         const numDoc = row['Número de Documento'] || '';
-        const rif1 = row['RIF.1'] || '';
-        const fechaRec = row['Fechas de Recaudación'] || '';
+        const rifRetenedor = row['RIF'] || '';
+        const rifContribuyente = row['RIF Contribuyente'] || row['RIF.1'] || '';
+        const fechaRec = row['Fecha de Recaudación'] || row['Fecha Recaudación'] || row['Fechas de Recaudación'] || '';
 
         // Filtrar por Dependencia si está seleccionada
         if (dependenciaSelected.length > 0 && !dependenciaSelected.includes(reg)) return;
@@ -158,29 +151,62 @@ function updateUI() {
 
         stats.total += monto;
         const lastNum = rif.replace(/[^0-9]/g, '').slice(-1);
-        if (terminalSelected.includes(lastNum)) stats.term += monto;
+        
+        // Filtro global de terminales para la tabla y las gráficas
+        if (terminalSelected.length > 0 && !terminalSelected.includes(lastNum)) return;
+
+        if (terminalSelected.length === 0 || terminalSelected.includes(lastNum)) stats.term += monto;
         stats.groups[imp] = (stats.groups[imp] || 0) + monto;
 
-        if (nombre.toLowerCase().includes(search) || rif.toLowerCase().includes(search)) {
+        if (search === '' || nombre.toLowerCase().includes(search) || rif.toLowerCase().includes(search)) {
             stats.visible++;
             stats.uniqueRifs.add(rif);
-            const contribName = nombre !== 'N/A' ? nombre : rif;
-            stats.topContrib[contribName] = (stats.topContrib[contribName] || 0) + monto;
+            if (lastNum) {
+                stats.topTerminals['Terminal ' + lastNum] = (stats.topTerminals['Terminal ' + lastNum] || 0) + monto;
+            }
             
-            const onTime = checkCompliance(rif, periodo, fechaRec);
-            if (onTime !== null) {
-                const terminalNum = parseInt(rif.replace(/[^0-9]/g, '').slice(-1), 10);
-                stats.compliance.evaluadas++;
-                if (onTime) {
-                    stats.compliance.aTiempo++;
-                    if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].aTiempo++;
+            // Validar filtros de métricas
+            let passMetricFilters = true;
+            if (metricYear || metricMonth) {
+                const parseDate = (str) => {
+                    if (!str || typeof str !== 'string') return null;
+                    let parts = str.split(/[-/]/);
+                    if (parts.length < 3 && str.includes(' ')) parts = str.split(' ')[0].split(/[-/]/);
+                    if (parts.length >= 3) {
+                        const part0 = parseInt(parts[0], 10);
+                        const part1 = parseInt(parts[1], 10);
+                        const part2 = parseInt(parts[2], 10);
+                        if (part0 > 31) return new Date(part0, part1 - 1, part2);
+                        return new Date(part2, part1 - 1, part0);
+                    }
+                    return null;
+                };
+                const dPeriodo = parseDate(periodo);
+                if (dPeriodo) {
+                    if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) passMetricFilters = false;
+                    if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) passMetricFilters = false;
                 } else {
-                    stats.compliance.retraso++;
-                    if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].retraso++;
+                    passMetricFilters = false;
+                }
+            }
+            
+            if (passMetricFilters && metricTerminals.includes(lastNum)) {
+                const onTime = checkCompliance(rif, periodo, fechaRec);
+                if (onTime !== null) {
+                    const terminalNum = parseInt(lastNum, 10);
+                    stats.compliance.evaluadas++;
+                    if (onTime) {
+                        stats.compliance.aTiempo++;
+                        if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].aTiempo++;
+                    } else {
+                        stats.compliance.retraso++;
+                        if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].retraso++;
+                    }
                 }
             }
 
-            tbody.innerHTML += `
+            if (tbody) {
+                tbody.innerHTML += `
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-4 py-4 whitespace-nowrap text-slate-600">${codForma}</td>
                     <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${forma}</td>
@@ -190,156 +216,329 @@ function updateUI() {
                     <td class="px-4 py-4 whitespace-nowrap text-slate-500">${banco}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-slate-500">${tipoDoc}</td>
                     <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-400 uppercase text-[10px]">${imp}</td>
-                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${rif}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${rifRetenedor}</td>
                     <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${nombre}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-slate-500">${periodo}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-slate-500">${numDoc}</td>
-                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${rif1}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${rifContribuyente}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-right font-black text-slate-800">${format(monto)}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-slate-500">${fechaRec}</td>
                 </tr>`;
+            }
         }
     });
 
-    document.getElementById('statCount').textContent = stats.uniqueRifs.size;
+    const statCount = document.getElementById('statCount');
+    if (statCount) statCount.textContent = stats.uniqueRifs.size;
     
-    document.getElementById('statTotal').textContent = format(stats.total);
-    document.getElementById('statTotal').title = format(stats.total);
+    const statTotal = document.getElementById('statTotal');
+    if (statTotal) {
+        statTotal.textContent = format(stats.total);
+        statTotal.title = format(stats.total);
+    }
     
-    document.getElementById('statTerminal').textContent = format(stats.term);
-    document.getElementById('statTerminal').title = format(stats.term);
+    const statTerminal = document.getElementById('statTerminal');
+    if (statTerminal) {
+        statTerminal.textContent = format(stats.term);
+        statTerminal.title = format(stats.term);
+    }
     
-    document.getElementById('statOthers').textContent = format(stats.total - stats.term);
-    document.getElementById('statOthers').title = format(stats.total - stats.term);
+    const statOthers = document.getElementById('statOthers');
+    if (statOthers) {
+        statOthers.textContent = format(stats.total - stats.term);
+        statOthers.title = format(stats.total - stats.term);
+    }
 
-    renderCharts(stats.groups, stats.total, stats.topContrib, stats.compliance);
+    renderCharts(stats.groups, stats.total, stats.topTerminals, stats.compliance);
 }
 
-function renderCharts(groups, total, topContrib, compliance) {
+function renderCharts(groups, total, topTerminals, compliance) {
     const labels = Object.keys(groups);
     const data = Object.values(groups);
     const colors = ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-    if (charts.pie) charts.pie.destroy();
-    charts.pie = new Chart(document.getElementById('pieChart'), {
-        type: 'doughnut',
-        data: {
-            labels: labels.map((l, i) => `${l} (${((data[i]/total)*100).toFixed(1)}%)`),
-            datasets: [{ data, backgroundColor: colors, borderWidth: 4, borderColor: '#fff' }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-    });
+    const pieChartCtx = document.getElementById('pieChart');
+    if (pieChartCtx) {
+        if (charts.pie) charts.pie.destroy();
+        charts.pie = new Chart(pieChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels.map((l, i) => `${l} (${((data[i]/total)*100).toFixed(1)}%)`),
+                datasets: [{ data, backgroundColor: colors, borderWidth: 4, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+    }
 
-    const top5 = Object.entries(topContrib)
+    const top5 = Object.entries(topTerminals)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
         
-    const barLabels = top5.map(t => t[0].length > 18 ? t[0].substring(0, 18) + '...' : t[0]);
+    const barLabels = top5.map(t => t[0]);
     const barData = top5.map(t => t[1]);
 
-    if (charts.bar) charts.bar.destroy();
-    charts.bar = new Chart(document.getElementById('barChart'), {
-        type: 'bar',
-        data: {
-            labels: barLabels,
-            datasets: [{ 
-                data: barData, 
-                backgroundColor: ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], 
-                borderRadius: 4 
-            }]
-        },
-        options: { 
-            indexAxis: 'y',
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: (items) => top5[items[0].dataIndex][0],
-                        label: (item) => "Bs. " + new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.raw)
+    const barChartCtx = document.getElementById('barChart');
+    if (barChartCtx) {
+        if (charts.bar) charts.bar.destroy();
+        charts.bar = new Chart(barChartCtx, {
+            type: 'bar',
+            data: {
+                labels: barLabels,
+                datasets: [{ 
+                    data: barData, 
+                    backgroundColor: ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], 
+                    borderRadius: 4 
+                }]
+            },
+            options: { 
+                indexAxis: 'y',
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => top5[items[0].dataIndex][0],
+                            label: (item) => "Bs. " + new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.raw)
+                        }
                     }
-                }
-            } 
-        }
-    });
+                } 
+            }
+        });
+    }
 
     // === METRICS RENDER ===
-    document.getElementById('kpiEvaluadas').textContent = compliance.evaluadas;
-    if (compliance.evaluadas > 0) {
-        document.getElementById('kpiATiempo').textContent = ((compliance.aTiempo / compliance.evaluadas) * 100).toFixed(1) + '%';
-        document.getElementById('kpiRetraso').textContent = ((compliance.retraso / compliance.evaluadas) * 100).toFixed(1) + '%';
-    } else {
-        document.getElementById('kpiATiempo').textContent = '0%';
-        document.getElementById('kpiRetraso').textContent = '0%';
+    const kpiEvaluadas = document.getElementById('kpiEvaluadas');
+    if (kpiEvaluadas) kpiEvaluadas.textContent = compliance.evaluadas;
+    
+    const kpiATiempo = document.getElementById('kpiATiempo');
+    const kpiRetraso = document.getElementById('kpiRetraso');
+    if (kpiATiempo && kpiRetraso) {
+        if (compliance.evaluadas > 0) {
+            kpiATiempo.textContent = ((compliance.aTiempo / compliance.evaluadas) * 100).toFixed(1) + '%';
+            kpiRetraso.textContent = ((compliance.retraso / compliance.evaluadas) * 100).toFixed(1) + '%';
+        } else {
+            kpiATiempo.textContent = '0%';
+            kpiRetraso.textContent = '0%';
+        }
     }
     
     const termLabels = ['0','1','2','3','4','5','6','7','8','9'];
-    const onTimeData = termLabels.map(t => compliance.byTerminal[t].aTiempo);
-    const lateData = termLabels.map(t => compliance.byTerminal[t].retraso);
-    
-    if (charts.metricsBar) charts.metricsBar.destroy();
-    charts.metricsBar = new Chart(document.getElementById('metricsBarChart'), {
-        type: 'bar',
-        data: {
-            labels: termLabels.map(t => 'Terminal ' + t),
-            datasets: [
-                {
-                    label: 'A Tiempo',
-                    data: onTimeData,
-                    backgroundColor: '#10b981',
-                    borderRadius: 4
-                },
-                {
-                    label: 'Retrasado',
-                    data: lateData,
-                    backgroundColor: '#f43f5e',
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { stacked: true },
-                y: { stacked: true, beginAtZero: true }
-            },
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
+    const percentData = termLabels.map(t => {
+        const aTiempo = compliance.byTerminal[t].aTiempo;
+        const retraso = compliance.byTerminal[t].retraso;
+        const total = aTiempo + retraso;
+        return total > 0 ? ((aTiempo / total) * 100).toFixed(1) : 0;
     });
+    
+    const metricsBarCtx = document.getElementById('metricsBarChart');
+    if (metricsBarCtx) {
+        if (charts.metricsBar) charts.metricsBar.destroy();
+        
+        const metricTerminals = document.querySelectorAll('.metric-terminal').length > 0 
+            ? Array.from(document.querySelectorAll('.metric-terminal:checked')).map(cb => cb.value)
+            : termLabels;
+            
+        const filteredLabels = termLabels.filter(t => metricTerminals.includes(t)).map(t => 'Terminal ' + t);
+        const filteredData = termLabels.filter(t => metricTerminals.includes(t)).map(t => percentData[t]);
+        
+        charts.metricsBar = new Chart(metricsBarCtx, {
+            type: 'bar',
+            data: {
+                labels: filteredLabels,
+                datasets: [
+                    {
+                        label: '% Pagos al Día',
+                        data: filteredData,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (item) => item.raw + '% al día'
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
 function clearFilters() {
-    document.getElementById('tableSearch').value = '';
+    const searchInput = document.getElementById('tableSearch');
+    if (searchInput) searchInput.value = '';
     document.querySelectorAll('.terminal-checkbox, .dependencia-checkbox, .impuesto-checkbox').forEach(cb => {
         cb.checked = false;
     });
+    const yearSelect = document.getElementById('metricYear');
+    if (yearSelect) yearSelect.value = '';
+    const monthSelect = document.getElementById('metricMonth');
+    if (monthSelect) monthSelect.value = '';
+    document.querySelectorAll('.metric-terminal').forEach(cb => cb.checked = true);
     updateUI();
 }
 
 // Listeners
-document.getElementById('csvFileInput').addEventListener('change', async (e) => {
-    const files = e.target.files;
-    if (files.length === 0) return;
+const tableSearch = document.getElementById('tableSearch');
+if (tableSearch) tableSearch.addEventListener('input', updateUI);
+// Modal Logic
+const uploadModal = document.getElementById('uploadModal');
+const uploadModalContent = document.getElementById('uploadModalContent');
+const openUploadModalBtn = document.getElementById('openUploadModalBtn');
+const closeUploadModalBtn = document.getElementById('closeUploadModalBtn');
+const dropZone = document.getElementById('dropZone');
+const csvFileInput = document.getElementById('csvFileInput');
+const fileListContainer = document.getElementById('fileListContainer');
+const btnReadFiles = document.getElementById('btnReadFiles');
+const btnSaveFiles = document.getElementById('btnSaveFiles');
+const uploadProgress = document.getElementById('uploadProgress');
+const uploadStatusText = document.getElementById('uploadStatusText');
+
+let pendingFiles = [];
+
+function openUploadModal() {
+    uploadModal.classList.remove('hidden');
+    // peqeña animación
+    setTimeout(() => {
+        uploadModalContent.classList.remove('scale-95', 'opacity-0');
+        uploadModalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeUploadModal() {
+    uploadModalContent.classList.remove('scale-100', 'opacity-100');
+    uploadModalContent.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        uploadModal.classList.add('hidden');
+        resetModal();
+    }, 300);
+}
+
+function resetModal() {
+    pendingFiles = [];
+    csvFileInput.value = '';
+    fileListContainer.innerHTML = '';
+    fileListContainer.classList.add('hidden');
+    btnReadFiles.disabled = true;
+    btnSaveFiles.disabled = true;
+    uploadProgress.classList.add('hidden');
+    btnReadFiles.classList.remove('hidden');
+    btnSaveFiles.classList.remove('hidden');
+}
+
+function handleFilesSelect(files) {
+    if(files.length === 0) return;
+    pendingFiles = Array.from(files);
     
-    document.getElementById('fileStatusLabel').textContent = "Cargando " + files.length + " archivo(s)...";
+    fileListContainer.innerHTML = '';
+    fileListContainer.classList.remove('hidden');
+    
+    pendingFiles.forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-100 rounded-lg p-2 flex justify-between items-center text-sm';
+        div.innerHTML = `<span class="font-bold text-slate-700 truncate mr-2">${file.name}</span> <span class="text-xs text-slate-400 whitespace-nowrap">${(file.size / 1024).toFixed(1)} KB</span>`;
+        fileListContainer.appendChild(div);
+    });
+    
+    btnReadFiles.disabled = false;
+    btnSaveFiles.disabled = false;
+}
+
+if(openUploadModalBtn) openUploadModalBtn.addEventListener('click', openUploadModal);
+if(closeUploadModalBtn) closeUploadModalBtn.addEventListener('click', closeUploadModal);
+
+if(dropZone) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('bg-blue-50', 'border-blue-400'), false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('bg-blue-50', 'border-blue-400'), false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFilesSelect(files);
+    }, false);
+}
+
+if(csvFileInput) {
+    csvFileInput.addEventListener('change', (e) => {
+        handleFilesSelect(e.target.files);
+    });
+}
+
+async function executeUpload(action) {
+    if(pendingFiles.length === 0) return;
+    
+    btnReadFiles.classList.add('hidden');
+    btnSaveFiles.classList.add('hidden');
+    uploadProgress.classList.remove('hidden');
+    uploadStatusText.innerText = action === 'save' ? 'Guardando en Base de Datos...' : 'Procesando archivos...';
     
     const formData = new FormData();
-    for(let i=0; i<files.length; i++) {
-        formData.append('file', files[i]);
-    }
+    pendingFiles.forEach(file => formData.append('file', file));
+    formData.append('action', action);
     
     try {
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
+        const response = await fetch('/upload', { method: 'POST', body: formData });
         const result = await response.json();
         
+        if (response.ok) {
+            appData = result.data;
+            populateFilters();
+            updateUI();
+            
+            if(action === 'save' && result.message) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: result.message,
+                    confirmButtonColor: '#2563eb'
+                });
+            }
+            
+            closeUploadModal();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Archivo',
+                text: result.error,
+                confirmButtonColor: '#ef4444'
+            });
+            resetModal(); // volver al estado normal si hay error
+        }
+    } catch (error) {
+        console.error("Error subiendo el archivo:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Conexión',
+            text: 'No se pudo contactar al servidor.',
+            confirmButtonColor: '#ef4444'
+        });
+        resetModal();
+    }
+}
+
+if(btnReadFiles) btnReadFiles.addEventListener('click', () => executeUpload('read'));
+if(btnSaveFiles) btnSaveFiles.addEventListener('click', () => executeUpload('save'));
+
 function populateFilters() {
     const dependencias = new Set();
     const impuestos = new Set();
@@ -367,32 +566,36 @@ function populateFilters() {
         </label>
     `).join('');
 }
-
-        if (response.ok) {
-            document.getElementById('fileStatusLabel').textContent = "Cargados " + files.length + " archivo(s)";
-            appData = result.data;
-            populateFilters();
-            updateUI();
-        } else {
-            alert("Error: " + result.error);
-            document.getElementById('fileStatusLabel').textContent = "Error al cargar";
-        }
-    } catch (error) {
-        console.error("Error subiendo el archivo:", error);
-        alert("Error de conexiÃƒÆ’Ã‚Â³n al servidor");
-        document.getElementById('fileStatusLabel').textContent = "Error al cargar";
-    }
-});
-
-document.getElementById('tableSearch').addEventListener('input', updateUI);
 document.addEventListener('change', (e) => {
-    if (e.target.matches('.terminal-checkbox, .dependencia-checkbox, .impuesto-checkbox')) {
+    if (e.target.matches('.terminal-checkbox, .dependencia-checkbox, .impuesto-checkbox, #metricYear, #metricMonth, .metric-terminal')) {
         updateUI();
     }
 });
 
-// Al cargar la pÃƒÆ’Ã‚Â¡gina
-window.onload = updateUI;
+// Al cargar la página
+window.onload = async () => {
+    const lbl = document.getElementById('fileStatusLabel');
+    const urlParams = new URLSearchParams(window.location.search);
+    const lote = urlParams.get('lote');
+    
+    if (lote) {
+        if (lbl) lbl.textContent = `Mostrando Datos del Lote #${lote}`;
+        try {
+            const res = await fetch(`/api/data?lote=${lote}`);
+            const result = await res.json();
+            appData = result.data;
+            populateFilters();
+            updateUI();
+        } catch(e) {
+            console.error(e);
+        }
+    } else {
+        if (lbl) lbl.textContent = "Esperando Carga de Archivo";
+        // Dejar la appData en blanco por defecto como solicitó el usuario
+        appData = [];
+        updateUI();
+    }
+};
 
 // ==========================================
 // FUNCIONES DEL MODAL DE DETALLES
@@ -440,8 +643,12 @@ function openModal(type) {
             break;
         case 'graficoPie':
             title.textContent = 'Detalle de Contribuyentes por Impuesto';
+            let pieData = terminalSelected.length > 0 ? filteredData.filter(row => {
+                const rif = String(row['RIF.1'] || row['RIF'] || '');
+                return terminalSelected.includes(rif.replace(/[^0-9]/g, '').slice(-1));
+            }) : filteredData;
             // Ordenamos la data por impuesto para agruparlos visualmente
-            const sortedByImpuesto = [...filteredData].sort((a, b) => {
+            const sortedByImpuesto = [...pieData].sort((a, b) => {
                 const impA = a['Impuesto'] || 'Otros';
                 const impB = b['Impuesto'] || 'Otros';
                 return impA.localeCompare(impB);
@@ -450,32 +657,38 @@ function openModal(type) {
             setTimeout(() => renderModalChart('pie'), 100);
             break;
         case 'graficoBar':
-            title.textContent = 'Detalle de los Top 5 Contribuyentes';
-            // Calcular el Top 5 a partir de los datos filtrados
-            let topContrib = {};
-            filteredData.forEach(row => {
-                const nombre = row['Razón Social'] || 'N/A';
+            title.textContent = 'Detalle de los Top 5 Terminales';
+            
+            let barData = terminalSelected.length > 0 ? filteredData.filter(row => {
                 const rif = String(row['RIF.1'] || row['RIF'] || '');
-                const contribName = nombre !== 'N/A' ? nombre : rif;
+                return terminalSelected.includes(rif.replace(/[^0-9]/g, '').slice(-1));
+            }) : filteredData;
+
+            // Calcular el Top 5 a partir de los datos filtrados
+            let topTerminalsModal = {};
+            barData.forEach(row => {
+                const rif = String(row['RIF.1'] || row['RIF'] || '');
+                const lastNum = rif.replace(/[^0-9]/g, '').slice(-1);
                 
                 let valStr = String(row['Monto'] || '0');
                 if (valStr.includes(',')) valStr = valStr.replace(/\./g, '').replace(',', '.');
                 const monto = parseFloat(valStr.replace(/[^0-9.-]/g, '')) || 0;
                 
-                topContrib[contribName] = (topContrib[contribName] || 0) + monto;
+                if (lastNum) {
+                    topTerminalsModal['Terminal ' + lastNum] = (topTerminalsModal['Terminal ' + lastNum] || 0) + monto;
+                }
             });
             
-            const top5Names = Object.entries(topContrib)
+            const top5Terms = Object.entries(topTerminalsModal)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5)
-                .map(t => t[0]);
+                .map(t => t[0].replace('Terminal ', ''));
                 
-            // Filtrar las filas que pertenecen a esos 5 contribuyentes
-            const top5Data = filteredData.filter(row => {
-                const nombre = row['Razón Social'] || 'N/A';
+            // Filtrar las filas que pertenecen a esos 5 terminales
+            const top5Data = barData.filter(row => {
                 const rif = String(row['RIF.1'] || row['RIF'] || '');
-                const contribName = nombre !== 'N/A' ? nombre : rif;
-                return top5Names.includes(contribName);
+                const lastNum = rif.replace(/[^0-9]/g, '').slice(-1);
+                return top5Terms.includes(lastNum);
             });
             
             // Ordenar por Monto descendente

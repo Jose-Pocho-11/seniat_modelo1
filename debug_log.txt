@@ -1,5 +1,5 @@
 Columnas detectadas:
-['Código Forma', 'Forma', 'Código Dependencia', 'Dependencia', 'Código Banco', 'Banco', 'Tipo de Documento', 'Impuesto', 'RIF', 'Razón Social', 'Período', 'Número de Documento', 'RIF.1', 'Monto', 'Fechas de Recaudación']
+['0', '1', '2', '3', '4']
 
 Primera fila:
-{'Código Forma': 14.0, 'Forma': 'IVA-99', 'Código Dependencia': 10200.0, 'Dependencia': 'Región Capital', 'Código Banco': 102.0, 'Banco': 'Banco de Venezuela', 'Tipo de Documento': 'Declaración', 'Impuesto': 'IVA', 'RIF': 'J-12345678-9', 'Razón Social': 'Inversiones Alfa C.A.', 'Período': '2026-03', 'Número de Documento': 99482110.0, 'RIF.1': 'J-12345678-9', 'Monto': 15250.0, 'Fechas de Recaudación': '05/04/2026'}
+{'0': 'FECHA', '1': 'HORA', '2': 'DESCRIPCIÓN DEL MOVIMIENTO', '3': 'IMPORTE', '4': 'DIVISA'}

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Historial de Lotes</title>
+    
+    <!-- LIBRERÍAS LOCALES -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="flex min-h-screen overflow-hidden bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
+        <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+        <div class="p-8 border-b border-slate-100">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-24">
+                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-blue-600">Control</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+            <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Vistas</h3>
+                <div class="space-y-2">
+                    <a href="/" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        Dashboard Principal
+                    </a>
+                    <a href="/metricas" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        Métricas de Comportamiento
+                    </a>
+                    <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Directorio
+                    </a>
+                    <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 text-blue-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Historial de Lotes
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+                    {{ current_user[0] if current_user else 'U' }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+                </div>
+            </div>
+            <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </a>
+        </div>
+    </aside>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const resizer = document.getElementById('resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            if (newWidth < 200) newWidth = 200;
+            if (newWidth > 800) newWidth = 800;
+            sidebar.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+            }
+        });
+    </script>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between shrink-0">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800">Historial de Lotes</h2>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Registro de Subidas</p>
+            </div>
+            
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-10 space-y-6 custom-scrollbar animate-in">
+            <!-- HISTORIAL DE LOTES -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Historial de Lotes de Entrada</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-white text-[10px] uppercase font-black text-slate-400 tracking-widest border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3">Lote (ID)</th>
+                                <th class="px-4 py-3">Fecha y Hora</th>
+                                <th class="px-4 py-3">Usuario</th>
+                                <th class="px-4 py-3">Registros Procesados</th>
+                                <th class="px-4 py-3 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lotesBody" class="divide-y divide-slate-100">
+                            <!-- JS inyectará los datos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODAL AGREGAR CONTRIBUYENTE -->
+    <div id="addModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Registrar Contribuyente</h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form id="addForm" onsubmit="submitContribuyente(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">RIF <span class="text-red-500">*</span></label>
+                    <input type="text" id="addRif" required placeholder="J-12345678-9" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Razón Social <span class="text-red-500">*</span></label>
+                    <input type="text" id="addNombre" required placeholder="Empresa C.A." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Teléfono</label>
+                    <input type="text" id="addTelefono" placeholder="0414-0000000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Email</label>
+                    <input type="email" id="addEmail" placeholder="contacto@empresa.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dirección</label>
+                    <input type="text" id="addDireccion" placeholder="Av. Principal..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let searchTimeout = null;
+
+        function searchContribuyentes() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = document.getElementById('searchInput').value;
+                fetch(`/api/contribuyentes?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => renderTable(data))
+                    .catch(err => console.error("Error fetching data:", err));
+            }, 300);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('directoryBody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" class="px-6 py-8 text-center text-slate-500 italic">No se encontraron registros</td></tr>`;
+                return;
+            }
+
+            const format = (val) => new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Forma'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${row['Forma'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Dependencia'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Dependencia'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-600">${row['Código Banco'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Banco'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Tipo de Documento'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-400 uppercase text-[10px]">${row['Impuesto'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${row['RIF Retenedor'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-slate-700">${row['Razón Social'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Periodo'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Número de Documento'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-mono text-indigo-600 text-xs">${row['RIF Contribuyente'] || '-'}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-right font-black text-slate-800">${format(row['Monto'] || 0)}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-slate-500">${row['Fecha de Recaudación'] || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('flex');
+            document.getElementById('addForm').reset();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('addModal').classList.remove('flex');
+        }
+
+        async function submitContribuyente(e) {
+            e.preventDefault();
+            const data = {
+                rif: document.getElementById('addRif').value,
+                razon_social: document.getElementById('addNombre').value,
+                telefono: document.getElementById('addTelefono').value,
+                email: document.getElementById('addEmail').value,
+                direccion: document.getElementById('addDireccion').value,
+            };
+
+            try {
+                const res = await fetch('/api/contribuyentes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    closeAddModal();
+                    searchContribuyentes(); // Recargar tabla
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Error de conexión al servidor');
+            }
+        }
+
+        function loadLotes() {
+            fetch('/api/lotes')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('lotesBody');
+                    tbody.innerHTML = '';
+                    if (data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-slate-500 italic text-xs">No hay lotes registrados</td></tr>`;
+                        return;
+                    }
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-50 transition-colors text-xs';
+                        tr.innerHTML = `
+                            <td class="px-4 py-3 font-bold text-indigo-600">Lote #${row['Lote']}</td>
+                            <td class="px-4 py-3 text-slate-500">${row['Fecha']}</td>
+                            <td class="px-4 py-3 text-slate-700 font-bold">${row['Usuario']}</td>
+                            <td class="px-4 py-3 text-slate-600">${row['Registros']}</td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="/?lote=${row['Lote']}" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-bold rounded-lg transition-colors inline-block text-xs">Visualizar</a>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error("Error fetching lotes:", err));
+        }
+
+        // Cargar datos iniciales
+        window.onload = () => {
+            searchContribuyentes();
+            loadLotes();
+        };
+    </script>
+</body>
+</html>

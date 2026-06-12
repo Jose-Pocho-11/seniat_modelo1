@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Métricas de Comportamiento</title>
+    
+    <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    
+    <!-- FUENTE INTER LOCAL -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    
+    <!-- ESTILOS PERSONALIZADOS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="flex min-h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
+        <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+        <div class="p-8 border-b border-slate-100">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-24">
+                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-indigo-600">Control</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+            <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Vistas</h3>
+                <div class="space-y-2">
+                    <a href="/" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        Dashboard Principal
+                    </a>
+                    <a href="/metricas" class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-50 text-indigo-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        Métricas de Comportamiento
+                    </a>
+                    <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Directorio
+                    </a>
+                    <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Historial de Lotes
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+                    {{ current_user[0] if current_user else 'U' }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+                </div>
+            </div>
+            <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </a>
+        </div>
+    </aside>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const resizer = document.getElementById('resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            if (newWidth < 200) newWidth = 200;
+            if (newWidth > 800) newWidth = 800;
+            sidebar.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+            }
+        });
+    </script>
+
+    <!-- METRICS VIEW -->
+    <main id="view-metrics" class="flex-1 bg-slate-50/50 p-10 h-screen overflow-y-auto custom-scrollbar relative">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <header class="flex items-end justify-between">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Métricas de Comportamiento</h2>
+                    <p class="text-slate-500 mt-1 font-medium">Análisis avanzado de tendencias y comportamientos de contribuyentes.</p>
+                </div>
+                <button onclick="loadMockData()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1 transition-all text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    Generar Datos de Prueba
+                </button>
+            </header>
+            
+            <!-- FILTROS Y KPIS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Filtros Locales de Métricas -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm col-span-1 space-y-4">
+                    <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Filtros de Análisis</h3>
+                    
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
+                        <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                            <option value="">Todos</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Mes</label>
+                        <select id="metricMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                            <option value="">Todos</option>
+                            <option value="0">Enero</option>
+                            <option value="1">Febrero</option>
+                            <option value="2">Marzo</option>
+                            <option value="3">Abril</option>
+                            <option value="4">Mayo</option>
+                            <option value="5">Junio</option>
+                            <option value="6">Julio</option>
+                            <option value="7">Agosto</option>
+                            <option value="8">Septiembre</option>
+                            <option value="9">Octubre</option>
+                            <option value="10">Noviembre</option>
+                            <option value="11">Diciembre</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminales RIF (Último número)</label>
+                        <div class="grid grid-cols-5 gap-2">
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="1" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">1</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">2</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">3</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">4</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">5</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">6</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">7</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
+                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen KPIs -->
+                <div class="col-span-1 lg:col-span-2 grid grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-blue-100 shadow-sm flex flex-col justify-center">
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Pagos A Tiempo (Global)</p>
+                        <h3 id="kpiATiempo" class="text-4xl font-black text-blue-600">0%</h3>
+                        <p class="text-xs text-slate-400 mt-2">Cumplimiento del calendario fiscal para los filtros actuales</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pagos con Retraso (Global)</p>
+                        <h3 id="kpiRetraso" class="text-4xl font-black text-slate-700">0%</h3>
+                        <p class="text-xs text-slate-400 mt-2">Pagos después del límite para los filtros actuales</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHART AREA -->
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Porcentaje de Pagos al Día por Terminal</h4>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="metricsBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- DATOS DE PRUEBA (MOCK DATA) -->
+    <script>
+        function loadMockData() {
+            console.log("Generando mock data...");
+            const mockData = [];
+            for (let i = 0; i < 800; i++) {
+                const term = Math.floor(Math.random() * 10);
+                const month = Math.floor(Math.random() * 12) + 1;
+                const year = [2023, 2024, 2025][Math.floor(Math.random() * 3)];
+                
+                const periodo = `01/${month.toString().padStart(2, '0')}/${year}`;
+                
+                const isLate = Math.random() > 0.65; // ~65% a tiempo
+                let paymentDay = isLate ? 28 : 5; 
+                
+                let pMonth = month;
+                let pYear = year;
+                if (isLate && month === 12) {
+                    pMonth = 1;
+                    pYear = year + 1;
+                } else if (isLate) {
+                    pMonth = month + 1;
+                }
+                
+                const fechaRec = `${paymentDay.toString().padStart(2, '0')}/${pMonth.toString().padStart(2, '0')}/${pYear}`;
+                
+                mockData.push({
+                    "RIF": `J-1234567${term}-${term}`,
+                    "Período": periodo,
+                    "Fechas de Recaudación": fechaRec,
+                    "Monto": (Math.random() * 5000).toFixed(2).replace('.', ','),
+                    "Dependencia": "Capital",
+                    "Impuesto": "IVA",
+                    "Razón Social": "Empresa Simulada " + i
+                });
+            }
+            appData = mockData;
+            
+            if (typeof updateUI === 'function') {
+                updateUI();
+                alert("¡Datos de prueba generados con éxito!");
+            } else {
+                alert("Error: updateUI no está disponible.");
+            }
+        }
+        
+        // Auto-generar después de 1 segundo si no hay datos
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                if (appData && appData.length === 0) {
+                    loadMockData();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
