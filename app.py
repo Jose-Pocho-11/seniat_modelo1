@@ -584,15 +584,16 @@ def save_to_database(parsed_data, user_id):
     impuestos_cache = {}
     
     def get_or_create_banco(codigo, nombre):
-        if codigo in bancos_cache: return bancos_cache[codigo]
-        b = conn.execute('SELECT id FROM bancos WHERE codigo_banco = ?', (codigo,)).fetchone()
+        cache_key = f"{codigo}_{nombre}"
+        if cache_key in bancos_cache: return bancos_cache[cache_key]
+        b = conn.execute('SELECT id FROM bancos WHERE codigo_banco = ? OR nombre_banco = ?', (codigo, nombre)).fetchone()
         if b:
-            bancos_cache[codigo] = b['id']
+            bancos_cache[cache_key] = b['id']
             return b['id']
         conn.execute('INSERT INTO bancos (codigo_banco, nombre_banco) VALUES (?, ?)', (codigo, nombre))
         conn.commit()
         b_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-        bancos_cache[codigo] = b_id
+        bancos_cache[cache_key] = b_id
         return b_id
         
     def get_or_create_dependencia(nombre):
@@ -622,7 +623,7 @@ def save_to_database(parsed_data, user_id):
     def get_or_create_impuesto(nombre):
         if nombre in impuestos_cache: return impuestos_cache[nombre]
         # Usamos el nombre también como código temporalmente ya que viene junto en el reporte
-        i = conn.execute('SELECT id FROM tipos_impuesto WHERE codigo_impuesto = ?', (nombre,)).fetchone()
+        i = conn.execute('SELECT id FROM tipos_impuesto WHERE codigo_impuesto = ? OR nombre_impuesto = ?', (nombre, nombre)).fetchone()
         if i:
             impuestos_cache[nombre] = i['id']
             return i['id']
