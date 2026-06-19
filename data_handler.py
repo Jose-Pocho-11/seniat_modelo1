@@ -202,10 +202,12 @@ def get_calendar_for_year(anio):
     }
     """
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT mes, quincena, terminal_rif, dia_vencimiento FROM calendarios WHERE anio = ?", (anio,))
-    rows = cursor.fetchall()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT mes, quincena, terminal_rif, dia_vencimiento FROM calendarios WHERE anio = ?", (anio,))
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
     
     cal = {
         1: {m: {} for m in ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']},
@@ -226,25 +228,27 @@ def save_calendar_days(anio, mes, quincena, dias):
     dias: list of 10 values (for terminal 0 to 9). Values can be empty string.
     """
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    for terminal_rif, dia_vencimiento in enumerate(dias):
-        if dia_vencimiento == '' or dia_vencimiento is None:
-            # Eliminar si existe
-            cursor.execute('''
-                DELETE FROM calendarios 
-                WHERE anio = ? AND mes = ? AND quincena = ? AND terminal_rif = ?
-            ''', (anio, mes, quincena, terminal_rif))
-        else:
-            # Insertar o actualizar
-            cursor.execute('''
-                INSERT INTO calendarios (anio, mes, quincena, terminal_rif, dia_vencimiento)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(anio, mes, quincena, terminal_rif) DO UPDATE SET dia_vencimiento=excluded.dia_vencimiento
-            ''', (anio, mes, quincena, terminal_rif, int(dia_vencimiento)))
-            
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        
+        for terminal_rif, dia_vencimiento in enumerate(dias):
+            if dia_vencimiento == '' or dia_vencimiento is None:
+                # Eliminar si existe
+                cursor.execute('''
+                    DELETE FROM calendarios 
+                    WHERE anio = ? AND mes = ? AND quincena = ? AND terminal_rif = ?
+                ''', (anio, mes, quincena, terminal_rif))
+            else:
+                # Insertar o actualizar
+                cursor.execute('''
+                    INSERT INTO calendarios (anio, mes, quincena, terminal_rif, dia_vencimiento)
+                    VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT(anio, mes, quincena, terminal_rif) DO UPDATE SET dia_vencimiento=excluded.dia_vencimiento
+                ''', (anio, mes, quincena, terminal_rif, int(dia_vencimiento)))
+                
+        conn.commit()
+    finally:
+        conn.close()
 
 def get_calendar_dpp_for_year(anio):
     """
@@ -253,10 +257,12 @@ def get_calendar_dpp_for_year(anio):
     { ENE: {0:1, 1:2...}, FEB: {...} ... }
     """
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT mes, terminal_rif, dia_vencimiento FROM calendarios_dpp WHERE anio = ?", (anio,))
-    rows = cursor.fetchall()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT mes, terminal_rif, dia_vencimiento FROM calendarios_dpp WHERE anio = ?", (anio,))
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
     
     cal = {m: {} for m in ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']}
     is_empty = len(rows) == 0
@@ -273,23 +279,25 @@ def save_calendar_dpp_days(anio, mes, dias):
     dias: list of 10 values (for terminal 0 to 9). Values can be empty string.
     """
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    for terminal_rif, dia_vencimiento in enumerate(dias):
-        if dia_vencimiento == '' or dia_vencimiento is None:
-            # Eliminar si existe
-            cursor.execute('''
-                DELETE FROM calendarios_dpp 
-                WHERE anio = ? AND mes = ? AND terminal_rif = ?
-            ''', (anio, mes, terminal_rif))
-        else:
-            # Insertar o actualizar
-            cursor.execute('''
-                INSERT INTO calendarios_dpp (anio, mes, terminal_rif, dia_vencimiento)
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(anio, mes, terminal_rif) DO UPDATE SET dia_vencimiento=excluded.dia_vencimiento
-            ''', (anio, mes, terminal_rif, int(dia_vencimiento)))
-            
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        
+        for terminal_rif, dia_vencimiento in enumerate(dias):
+            if dia_vencimiento == '' or dia_vencimiento is None:
+                # Eliminar si existe
+                cursor.execute('''
+                    DELETE FROM calendarios_dpp 
+                    WHERE anio = ? AND mes = ? AND terminal_rif = ?
+                ''', (anio, mes, terminal_rif))
+            else:
+                # Insertar o actualizar
+                cursor.execute('''
+                    INSERT INTO calendarios_dpp (anio, mes, terminal_rif, dia_vencimiento)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(anio, mes, terminal_rif) DO UPDATE SET dia_vencimiento=excluded.dia_vencimiento
+                ''', (anio, mes, terminal_rif, int(dia_vencimiento)))
+                
+        conn.commit()
+    finally:
+        conn.close()
 

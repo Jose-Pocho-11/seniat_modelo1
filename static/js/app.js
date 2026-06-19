@@ -166,8 +166,26 @@ function updateUI() {
                 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
             }
         },
-        complianceDpp: { evaluadas: 0, aTiempo: 0, retraso: 0 },
-        complianceOtros: { evaluadas: 0, aTiempo: 0, retraso: 0 }
+        complianceDpp: { 
+            evaluadas: 0, aTiempo: 0, retraso: 0,
+            byTerminal: {
+                0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 },
+                2: { aTiempo: 0, retraso: 0 }, 3: { aTiempo: 0, retraso: 0 },
+                4: { aTiempo: 0, retraso: 0 }, 5: { aTiempo: 0, retraso: 0 },
+                6: { aTiempo: 0, retraso: 0 }, 7: { aTiempo: 0, retraso: 0 },
+                8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
+            }
+        },
+        complianceOtros: { 
+            evaluadas: 0, aTiempo: 0, retraso: 0,
+            byTerminal: {
+                0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 },
+                2: { aTiempo: 0, retraso: 0 }, 3: { aTiempo: 0, retraso: 0 },
+                4: { aTiempo: 0, retraso: 0 }, 5: { aTiempo: 0, retraso: 0 },
+                6: { aTiempo: 0, retraso: 0 }, 7: { aTiempo: 0, retraso: 0 },
+                8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
+            }
+        }
     };
 
     filteredData = []; // Limpiamos el arreglo de datos filtrados
@@ -296,11 +314,17 @@ function updateUI() {
                     if (onTime) {
                         stats.compliance.aTiempo++;
                         targetSub.aTiempo++;
-                        if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].aTiempo++;
+                        if (!isNaN(terminalNum)) {
+                            stats.compliance.byTerminal[terminalNum].aTiempo++;
+                            targetSub.byTerminal[terminalNum].aTiempo++;
+                        }
                     } else {
                         stats.compliance.retraso++;
                         targetSub.retraso++;
-                        if (!isNaN(terminalNum)) stats.compliance.byTerminal[terminalNum].retraso++;
+                        if (!isNaN(terminalNum)) {
+                            stats.compliance.byTerminal[terminalNum].retraso++;
+                            targetSub.byTerminal[terminalNum].retraso++;
+                        }
                     }
                 }
             }
@@ -515,30 +539,34 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
     }
 
     const termLabels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    const percentATiempo = termLabels.map(t => {
-        const aTiempo = compliance.byTerminal[t].aTiempo;
-        const total = aTiempo + compliance.byTerminal[t].retraso;
-        return total > 0 ? ((aTiempo / total) * 100).toFixed(1) : 0;
-    });
-    const percentRetraso = termLabels.map(t => {
-        const retraso = compliance.byTerminal[t].retraso;
-        const total = compliance.byTerminal[t].aTiempo + retraso;
-        return total > 0 ? ((retraso / total) * 100).toFixed(1) : 0;
-    });
 
-    const metricsBarCtx = document.getElementById('metricsBarChart');
-    if (metricsBarCtx) {
-        if (charts.metricsBar) charts.metricsBar.destroy();
+    const metricTerminals = document.querySelectorAll('.metric-terminal').length > 0
+        ? Array.from(document.querySelectorAll('.metric-terminal:checked')).map(cb => cb.value)
+        : termLabels;
 
-        const metricTerminals = document.querySelectorAll('.metric-terminal').length > 0
-            ? Array.from(document.querySelectorAll('.metric-terminal:checked')).map(cb => cb.value)
-            : termLabels;
+    const filteredLabels = termLabels.filter(t => metricTerminals.includes(t)).map(t => 'Terminal ' + t);
 
-        const filteredLabels = termLabels.filter(t => metricTerminals.includes(t)).map(t => 'Terminal ' + t);
+    function renderSubChart(ctxId, complianceData, chartKey) {
+        const ctx = document.getElementById(ctxId);
+        if (!ctx) return;
+
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        const percentATiempo = termLabels.map(t => {
+            const aTiempo = complianceData.byTerminal[t].aTiempo;
+            const total = aTiempo + complianceData.byTerminal[t].retraso;
+            return total > 0 ? ((aTiempo / total) * 100).toFixed(1) : 0;
+        });
+        const percentRetraso = termLabels.map(t => {
+            const retraso = complianceData.byTerminal[t].retraso;
+            const total = complianceData.byTerminal[t].aTiempo + retraso;
+            return total > 0 ? ((retraso / total) * 100).toFixed(1) : 0;
+        });
+
         const filteredDataATiempo = termLabels.filter(t => metricTerminals.includes(t)).map(t => percentATiempo[t]);
         const filteredDataRetraso = termLabels.filter(t => metricTerminals.includes(t)).map(t => percentRetraso[t]);
 
-        charts.metricsBar = new Chart(metricsBarCtx, {
+        charts[chartKey] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: filteredLabels,
@@ -574,6 +602,9 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
             }
         });
     }
+
+    if (complianceOtros && complianceOtros.byTerminal) renderSubChart('metricsBarChartOtros', complianceOtros, 'metricsBarOtros');
+    if (complianceDpp && complianceDpp.byTerminal) renderSubChart('metricsBarChartDpp', complianceDpp, 'metricsBarDpp');
 
     // Llamar a la función que renderiza la comparativa (se definirá más abajo)
     if (typeof renderComparisonChart === 'function') {
