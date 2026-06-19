@@ -471,7 +471,26 @@
 
                 <!-- 2. Gráfica de Métricas Otros Impuestos -->
                 <div class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-sm">
-                    <h4 class="font-black text-lg text-slate-800 mb-6">Cumplimiento por Terminal (Otros Impuestos)</h4>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h4 class="font-black text-lg text-slate-800">Cumplimiento por Terminal (Otros Impuestos)</h4>
+                        <div class="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar Meses</label>
+                            <div class="flex flex-wrap gap-1.5" id="compareMonthsOtrosContainer">
+                                <label class="cursor-pointer"><input type="checkbox" value="0" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Ene</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="1" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Feb</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="2" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Mar</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="3" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Abr</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="4" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">May</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="5" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Jun</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="6" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Jul</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="7" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Ago</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="8" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Sep</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="9" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Oct</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="10" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Nov</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="11" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Dic</div></label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="h-80 w-full">
                         <canvas id="metricsBarChartOtros"></canvas>
                     </div>
@@ -543,20 +562,6 @@
                     </div>
                 </div>
 
-                <!-- 5. Gráfica de Comparativa Histórica de Comportamiento -->
-                <div class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-sm flex flex-col mt-8">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="flex items-center gap-4">
-                            <h4 class="font-black text-lg text-indigo-800">Comparativa Histórica de Comportamiento</h4>
-                        </div>
-                        <div class="flex gap-2 text-xs font-bold text-slate-500 uppercase">
-                            Evolución de cumplimiento (A Tiempo) por Mes
-                        </div>
-                    </div>
-                    <div class="h-80 w-full mt-auto">
-                        <canvas id="historicalBarChart"></canvas>
-                    </div>
-                </div>
             </div>
 
         </div>

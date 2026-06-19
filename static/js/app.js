@@ -154,6 +154,9 @@ function updateUI() {
         ? getCheckedValues('.metric-terminal')
         : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+    const compareMonthCheckboxes = document.querySelectorAll('.compare-month-otros-checkbox:checked');
+    const compareMonths = Array.from(compareMonthCheckboxes).map(cb => cb.value);
+
     let stats = {
         total: 0, term: 0, groups: {}, visible: 0, uniqueRifs: new Set(), topTerminals: {},
         compliance: {
@@ -185,7 +188,37 @@ function updateUI() {
                 6: { aTiempo: 0, retraso: 0 }, 7: { aTiempo: 0, retraso: 0 },
                 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
             }
+        },
+        complianceOtrosByMonth: {}
+    };
+
+    const parseDate = (str) => {
+        if (!str || typeof str !== 'string') return null;
+        let s = str.trim();
+        if (s.includes(' ')) s = s.split(' ')[0];
+        let parts = s.split(/[-/]/);
+
+        if (parts.length === 2) {
+            if (parts[1] && parts[1].length === 4) {
+                const yearStr = parts[1].substring(0, 2);
+                const monthStr = parts[1].substring(2, 4);
+                const year = 2000 + parseInt(yearStr, 10);
+                const month = parseInt(monthStr, 10);
+                return new Date(year, month - 1, 1);
+            }
+            const part0 = parseInt(parts[0], 10);
+            const part1 = parseInt(parts[1], 10);
+            if (part0 > 1000) return new Date(part0, part1 - 1, 1);
+            return new Date(part1, part0 - 1, 1);
         }
+        if (parts.length >= 3) {
+            const part0 = parseInt(parts[0], 10);
+            const part1 = parseInt(parts[1], 10);
+            const part2 = parseInt(parts[2], 10);
+            if (part0 > 31) return new Date(part0, part1 - 1, part2);
+            return new Date(part2, part1 - 1, part0);
+        }
+        return null;
     };
 
     filteredData = []; // Limpiamos el arreglo de datos filtrados
@@ -263,44 +296,40 @@ function updateUI() {
                 estadoHtml = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold">Retrasado</span>';
             }
 
-            // Validar filtros de métricas
             let passMetricFilters = true;
-            if (metricYear || metricMonth) {
-                const parseDate = (str) => {
-                    if (!str || typeof str !== 'string') return null;
-                    let s = str.trim();
-                    if (s.includes(' ')) s = s.split(' ')[0];
-                    let parts = s.split(/[-/]/);
+            const dPeriodo = parseDate(periodo);
 
-                    if (parts.length === 2) {
-                        if (parts[1] && parts[1].length === 4) {
-                            const yearStr = parts[1].substring(0, 2);
-                            const monthStr = parts[1].substring(2, 4);
-                            const year = 2000 + parseInt(yearStr, 10);
-                            const month = parseInt(monthStr, 10);
-                            return new Date(year, month - 1, 1);
+            if (dPeriodo) {
+                if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) passMetricFilters = false;
+
+                // --- MONTH COMPARISON LOGIC ---
+                if (!isDpp && onTime !== null && metricTerminals.includes(lastNum)) {
+                    // Si pasa el filtro de año, lo consideramos para la comparación de meses
+                    if (!metricYear || dPeriodo.getFullYear().toString() === metricYear) {
+                        const mStr = dPeriodo.getMonth().toString();
+                        if (compareMonths.includes(mStr)) {
+                            if (!stats.complianceOtrosByMonth[mStr]) {
+                                stats.complianceOtrosByMonth[mStr] = {
+                                    evaluadas: 0, aTiempo: 0, retraso: 0,
+                                    byTerminal: { 0: {aTiempo:0,retraso:0}, 1: {aTiempo:0,retraso:0}, 2: {aTiempo:0,retraso:0}, 3: {aTiempo:0,retraso:0}, 4: {aTiempo:0,retraso:0}, 5: {aTiempo:0,retraso:0}, 6: {aTiempo:0,retraso:0}, 7: {aTiempo:0,retraso:0}, 8: {aTiempo:0,retraso:0}, 9: {aTiempo:0,retraso:0} }
+                                };
+                            }
+                            const terminalNum = parseInt(lastNum, 10);
+                            stats.complianceOtrosByMonth[mStr].evaluadas++;
+                            if (onTime) {
+                                stats.complianceOtrosByMonth[mStr].aTiempo++;
+                                if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].aTiempo++;
+                            } else {
+                                stats.complianceOtrosByMonth[mStr].retraso++;
+                                if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].retraso++;
+                            }
                         }
-                        const part0 = parseInt(parts[0], 10);
-                        const part1 = parseInt(parts[1], 10);
-                        if (part0 > 1000) return new Date(part0, part1 - 1, 1);
-                        return new Date(part1, part0 - 1, 1);
                     }
-                    if (parts.length >= 3) {
-                        const part0 = parseInt(parts[0], 10);
-                        const part1 = parseInt(parts[1], 10);
-                        const part2 = parseInt(parts[2], 10);
-                        if (part0 > 31) return new Date(part0, part1 - 1, part2);
-                        return new Date(part2, part1 - 1, part0);
-                    }
-                    return null;
-                };
-                const dPeriodo = parseDate(periodo);
-                if (dPeriodo) {
-                    if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) passMetricFilters = false;
-                    if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) passMetricFilters = false;
-                } else {
-                    passMetricFilters = false;
                 }
+
+                if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) passMetricFilters = false;
+            } else {
+                if (metricYear || metricMonth) passMetricFilters = false;
             }
 
             if (passMetricFilters && metricTerminals.includes(lastNum)) {
@@ -362,7 +391,7 @@ function updateUI() {
         statOthers.title = format(stats.total - stats.term);
     }
 
-    renderCharts(stats.groups, stats.total, stats.topTerminals, stats.compliance, stats.complianceDpp, stats.complianceOtros);
+    renderCharts(stats.groups, stats.total, stats.topTerminals, stats.compliance, stats.complianceDpp, stats.complianceOtros, stats.complianceOtrosByMonth, compareMonths);
 }
 
 function renderTablePage() {
@@ -458,7 +487,7 @@ window.changePage = function (newPage) {
     }
 };
 
-function renderCharts(groups, total, topTerminals, compliance, complianceDpp, complianceOtros) {
+function renderCharts(groups, total, topTerminals, compliance, complianceDpp, complianceOtros, complianceOtrosByMonth, compareMonths) {
     const labels = Object.keys(groups);
     const data = Object.values(groups);
     const colors = ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -613,7 +642,68 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
         });
     }
 
-    if (complianceOtros && complianceOtros.byTerminal) renderSubChart('metricsBarChartOtros', complianceOtros, 'metricsBarOtros');
+    if (compareMonths && compareMonths.length > 0) {
+        // Multi-month comparison rendering
+        const ctxOtros = document.getElementById('metricsBarChartOtros');
+        if (ctxOtros) {
+            if (charts['metricsBarOtros']) charts['metricsBarOtros'].destroy();
+            
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            // Use an array of colors for the datasets
+            const colors = ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#eab308', '#a855f7'];
+            
+            const datasets = [];
+            compareMonths.forEach((mStr, idx) => {
+                const complianceData = complianceOtrosByMonth[mStr];
+                const dataATiempo = termLabels.filter(t => metricTerminals.includes(t)).map(t => {
+                    if (!complianceData) return 0;
+                    const aTiempo = complianceData.byTerminal[t].aTiempo;
+                    const total = aTiempo + complianceData.byTerminal[t].retraso;
+                    return total > 0 ? ((aTiempo / total) * 100).toFixed(1) : 0;
+                });
+                
+                datasets.push({
+                    label: `${monthNames[parseInt(mStr)]} (% A Tiempo)`,
+                    data: dataATiempo,
+                    backgroundColor: colors[idx % colors.length],
+                    borderRadius: 6
+                });
+            });
+
+            charts['metricsBarOtros'] = new Chart(ctxOtros, {
+                type: 'bar',
+                data: {
+                    labels: filteredLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: (item) => item.dataset.label + ': ' + item.raw + '%'
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const terminal = metricTerminals[index];
+                            openMetricsDetailModal('otros', 'a_tiempo', terminal);
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        if (complianceOtros && complianceOtros.byTerminal) renderSubChart('metricsBarChartOtros', complianceOtros, 'metricsBarOtros');
+    }
+
     if (complianceDpp && complianceDpp.byTerminal) renderSubChart('metricsBarChartDpp', complianceDpp, 'metricsBarDpp');
     // Llamar a la gráfica histórica
     if (typeof renderHistoricalChart === 'function') {
@@ -649,6 +739,9 @@ if (metricYearListener) metricYearListener.addEventListener('change', async () =
 
 const metricMonthListener = document.getElementById('metricMonth');
 if (metricMonthListener) metricMonthListener.addEventListener('change', updateUI);
+
+const compareMonthsOtrosCheckboxes = document.querySelectorAll('.compare-month-otros-checkbox');
+compareMonthsOtrosCheckboxes.forEach(cb => cb.addEventListener('change', updateUI));
 
 const metricRuleListener = document.getElementById('metricRule');
 if (metricRuleListener) metricRuleListener.addEventListener('change', updateUI);
