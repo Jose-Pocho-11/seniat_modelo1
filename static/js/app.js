@@ -598,6 +598,16 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
                             label: (item) => item.dataset.label + ': ' + item.raw + '%'
                         }
                     }
+                },
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const datasetIndex = elements[0].datasetIndex;
+                        const terminal = metricTerminals[index];
+                        const isLateStr = datasetIndex === 0 ? 'a_tiempo' : 'retrasado';
+                        const type = chartKey === 'metricsBarDpp' ? 'dpp' : 'otros';
+                        openMetricsDetailModal(type, isLateStr, terminal);
+                    }
                 }
             }
         });
@@ -671,7 +681,9 @@ function renderComparisonChart() {
             if (passMetricFilters) {
                 const imp = row['Impuesto'] || 'Otros';
                 const isDpp = imp.toLowerCase().includes('dpp') || imp.toLowerCase().includes('anticipo');
-                const appliedRule = isDpp ? 'dpp' : 'retenciones';
+                if (isDpp) return; // Excluir DPP para la gráfica comparativa
+                
+                const appliedRule = 'retenciones';
                 const onTime = checkCompliance(rif, periodo, fechaRec, appliedRule);
                 if (onTime !== null) {
                     if (onTime) aTiempo++;
@@ -731,6 +743,15 @@ function renderComparisonChart() {
                     callbacks: {
                         label: (item) => item.dataset.label + ': ' + item.raw + '%'
                     }
+                }
+            },
+            onClick: (e, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const datasetIndex = elements[0].datasetIndex;
+                    const terminal = targets[index];
+                    const isLateStr = datasetIndex === 0 ? 'a_tiempo' : 'retrasado';
+                    openMetricsDetailModal('otros', isLateStr, terminal);
                 }
             }
         }
@@ -1609,11 +1630,16 @@ document.addEventListener('keydown', (e) => {
 // METRICS DETAIL MODAL
 // ==========================================
 
-function openMetricsDetailModal(type, isLateStr) {
+function openMetricsDetailModal(type, isLateStr, terminalFilter = null) {
     const isLate = (isLateStr === 'retrasado');
     const detailedData = filteredData.filter(row => {
         if (type === 'dpp' && !row._isDpp) return false;
         if (type === 'otros' && row._isDpp) return false;
+        if (terminalFilter !== null) {
+            const rif = String(row['RIF.1'] || row['RIF'] || '');
+            const lastNum = rif.replace(/[^0-9]/g, '').slice(-1);
+            if (lastNum !== String(terminalFilter)) return false;
+        }
         if (row._onTime === null) return false;
         if (isLate && row._onTime === true) return false;
         if (!isLate && row._onTime === false) return false;
