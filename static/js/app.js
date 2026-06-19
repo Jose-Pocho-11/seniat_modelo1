@@ -615,147 +615,10 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
 
     if (complianceOtros && complianceOtros.byTerminal) renderSubChart('metricsBarChartOtros', complianceOtros, 'metricsBarOtros');
     if (complianceDpp && complianceDpp.byTerminal) renderSubChart('metricsBarChartDpp', complianceDpp, 'metricsBarDpp');
-
-    // Llamar a la función que renderiza la comparativa (se definirá más abajo)
-    if (typeof renderComparisonChart === 'function') {
-        renderComparisonChart();
+    // Llamar a la gráfica histórica
+    if (typeof renderHistoricalChart === 'function') {
+        renderHistoricalChart();
     }
-}
-
-
-function renderComparisonChart() {
-    const checkboxes = document.querySelectorAll('.comp-target-cb:checked');
-    const compCtx = document.getElementById('comparisonBarChart');
-
-    if (!compCtx) return;
-
-    const targets = Array.from(checkboxes).map(cb => cb.value);
-
-    const metricYear = document.getElementById('metricYear') ? document.getElementById('metricYear').value : '';
-    const metricMonth = document.getElementById('metricMonth') ? document.getElementById('metricMonth').value : '';
-
-    // Función auxiliar para calcular compliance de un terminal específico
-    const getComplianceForTerminal = (terminalValue) => {
-        let aTiempo = 0;
-        let retraso = 0;
-
-        appData.forEach(row => {
-            const rif = String(row['RIF.1'] || row['RIF'] || '');
-            const lastNum = rif.replace(/[^0-9]/g, '').slice(-1);
-            if (lastNum !== terminalValue) return;
-
-            const periodo = row['Período'] || row['Periodo'] || '';
-            const fechaRec = row['Fecha de Recaudación'] || row['Fecha Recaudación'] || row['Fechas de Recaudación'] || '';
-
-            // Validar filtros de métricas
-            let passMetricFilters = true;
-            if (metricYear || metricMonth) {
-                const parseDate = (str) => {
-                    if (!str || typeof str !== 'string') return null;
-                    let parts = str.split(/[-/]/);
-                    if (parts.length < 3 && str.includes(' ')) parts = str.split(' ')[0].split(/[-/]/);
-                    if (parts.length === 2) {
-                        const part0 = parseInt(parts[0], 10);
-                        const part1 = parseInt(parts[1], 10);
-                        if (part0 > 1000) return new Date(part0, part1 - 1, 1);
-                        return new Date(part1, part0 - 1, 1);
-                    }
-                    if (parts.length >= 3) {
-                        const part0 = parseInt(parts[0], 10);
-                        const part1 = parseInt(parts[1], 10);
-                        const part2 = parseInt(parts[2], 10);
-                        if (part0 > 31) return new Date(part0, part1 - 1, part2);
-                        return new Date(part2, part1 - 1, part0);
-                    }
-                    return null;
-                };
-                const dPeriodo = parseDate(periodo);
-                if (dPeriodo) {
-                    if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) passMetricFilters = false;
-                    if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) passMetricFilters = false;
-                } else {
-                    passMetricFilters = false;
-                }
-            }
-
-            if (passMetricFilters) {
-                const imp = row['Impuesto'] || 'Otros';
-                const isDpp = imp.toLowerCase().includes('dpp') || imp.toLowerCase().includes('anticipo');
-                if (isDpp) return; // Excluir DPP para la gráfica comparativa
-                
-                const appliedRule = 'retenciones';
-                const onTime = checkCompliance(rif, periodo, fechaRec, appliedRule);
-                if (onTime !== null) {
-                    if (onTime) aTiempo++;
-                    else retraso++;
-                }
-            }
-        });
-
-        const total = aTiempo + retraso;
-        return {
-            aTiempo: total > 0 ? parseFloat(((aTiempo / total) * 100).toFixed(1)) : 0,
-            retraso: total > 0 ? parseFloat(((retraso / total) * 100).toFixed(1)) : 0
-        };
-    };
-
-    const chartLabels = [];
-    const dataATiempo = [];
-    const dataRetraso = [];
-
-    targets.forEach(tValue => {
-        const stats = getComplianceForTerminal(tValue);
-        chartLabels.push(`Terminal ${tValue}`);
-        dataATiempo.push(stats.aTiempo);
-        dataRetraso.push(stats.retraso);
-    });
-
-    if (charts.comparisonBar) charts.comparisonBar.destroy();
-
-    charts.comparisonBar = new Chart(compCtx, {
-        type: 'bar',
-        data: {
-            labels: chartLabels,
-            datasets: [
-                {
-                    label: '% A Tiempo',
-                    data: dataATiempo,
-                    backgroundColor: '#10b981', // green
-                    borderRadius: 6
-                },
-                {
-                    label: '% Con Retraso',
-                    data: dataRetraso,
-                    backgroundColor: '#ef4444', // red
-                    borderRadius: 6
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
-            },
-            plugins: {
-                legend: { display: true, position: 'top' },
-                tooltip: {
-                    callbacks: {
-                        label: (item) => item.dataset.label + ': ' + item.raw + '%'
-                    }
-                }
-            },
-            onClick: (e, elements) => {
-                if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const datasetIndex = elements[0].datasetIndex;
-                    const terminal = targets[index];
-                    const isLateStr = datasetIndex === 0 ? 'a_tiempo' : 'retrasado';
-                    openMetricsDetailModal('otros', isLateStr, terminal);
-                }
-            }
-        }
-    });
 }
 
 function clearFilters() {
@@ -793,11 +656,6 @@ if (metricRuleListener) metricRuleListener.addEventListener('change', updateUI);
 const metricTerminalsListener = document.querySelectorAll('.metric-terminal');
 metricTerminalsListener.forEach(cb => cb.addEventListener('change', updateUI));
 
-const compTarget1 = document.getElementById('compTarget1');
-if (compTarget1) compTarget1.addEventListener('change', renderComparisonChart);
-
-const compTarget2 = document.getElementById('compTarget2');
-if (compTarget2) compTarget2.addEventListener('change', renderComparisonChart);
 
 // Modal Logic
 const uploadModal = document.getElementById('uploadModal');
