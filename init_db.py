@@ -100,6 +100,27 @@ def init_db():
         cantidad_registros INTEGER NOT NULL,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
+
+    -- 9. TABLA: calendarios
+    CREATE TABLE IF NOT EXISTS calendarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        anio INTEGER NOT NULL,
+        mes TEXT NOT NULL,
+        quincena INTEGER NOT NULL,
+        terminal_rif INTEGER NOT NULL,
+        dia_vencimiento INTEGER NOT NULL,
+        UNIQUE(anio, mes, quincena, terminal_rif)
+    );
+
+    -- 10. TABLA: calendarios_dpp
+    CREATE TABLE IF NOT EXISTS calendarios_dpp (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        anio INTEGER NOT NULL,
+        mes TEXT NOT NULL,
+        terminal_rif INTEGER NOT NULL,
+        dia_vencimiento INTEGER NOT NULL,
+        UNIQUE(anio, mes, terminal_rif)
+    );
     """
     
     # Ejecutar múltiples sentencias SQL

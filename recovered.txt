@@ -1,0 +1,1051 @@
+Created At: 2026-06-18T23:46:12Z
+Completed At: 2026-06-18T23:46:12Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/app.py`
+Total Lines: 712
+Total Bytes: 28466
+Showing lines 1 to 712
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: from flask import Flask, render_template, request, jsonify, redirect, session, url_for, send_file
+2: from functools import wraps
+3: from werkzeug.security import generate_password_hash, check_password_hash
+4: from data_handler import process_files
+5: import sqlite3
+6: from init_db import init_db, DB_PATH
+7: import os
+8: import tempfile
+9: from reports_handler import generate_pdf_report, generate_word_report
+10: 
+11: app = Flask(__name__)
+12: app.secret_key = 'seniat_super_secret_key_123'
+13: 
+14: # Comprobar/Inicializar base de datos y administrador al iniciar la app
+15: init_db()
+16: 
+17: def login_required(f):
+18:     @wraps(f)
+19:     def decorated_function(*args, **kwargs):
+20:         if 'user_id' not in session:
+21:             return redirect(url_for('login'))
+22:         return f(*args, **kwargs)
+23:     return decorated_function
+24: 
+25: def get_db_connection():
+26:     conn = sqlite3.connect(DB_PATH, timeout=15)
+27:     conn.row_factory = sqlite3.Row
+28:     return conn
+29: 
+30: @app.route('/')
+31: @login_required
+32: def index():
+33:     return render_template('index.html', current_user=session.get('user_nombre'))
+34: 
+35: @app.route('/metricas')
+36: @login_required
+37: def metricas():
+38:     return render_template('metricas.html', current_user=session.get('user_nombre'))
+39: 
+40: @app.route('/directorio')
+41: @login_required
+42: def directorio():
+43:     return render_template('directorio.html', current_user=session.get('user_nombre'))
+44: 
+45: @app.route('/historial')
+46: @login_required
+47: def historial():
+48:   
+<truncated 28349 bytes>
+ dep_id, cod_forma, banco_id, doc_id, imp_id, rif, razon_social, periodo, num_doc, monto, fecha_rec)).fetchone()
+670:         
+671:         if existing:
+672:             ignored += 1
+673:             continue
+674:             
+675:         conn.execute('''
+676:             INSERT INTO recaudaciones (
+677:                 id, dependencia_id, codigo_control, codigo_subtipo, codigo_area, banco_id, tipo_documento_id, impuesto_id,
+678:                 rif, razon_social, periodo, numero_documento, monto, fecha_recaudacion
+679:             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+680:         ''', (
+681:             current_carga, dep_id, cod_forma, '', '', banco_id, doc_id, imp_id,
+682:             rif, razon_social, periodo, num_doc, monto, fecha_rec
+683:         ))
+684:         inserted += 1
+685:         
+686:     conn.execute('UPDATE historial_lotes SET cantidad_registros = ? WHERE id = ?', (inserted, current_carga))
+687:     conn.commit()
+688:     conn.close()
+689:     return inserted, ignored
+690: 
+691: @app.route('/upload', methods=['POST'])
+692: @login_required
+693: def upload_file():
+694:     files = request.files.getlist('file')
+695:     action = request.form.get('action', 'read')
+696:     
+697:     if not files or files[0].filename == '':
+698:         return jsonify({"error": "No se seleccionó ningún archivo"}), 400
+699:         
+700:     result, status_code = process_files(files)
+701:     
+702:     # Si todo salió bien y la acción es guardar en BD
+703:     if status_code == 200 and action == 'save' and 'data' in result:
+704:         inserted, ignored = save_to_database(result['data'], session['user_id'])
+705:         result['message'] = "Se guardaron exitosamente"
+706:         
+707:     return jsonify(result), status_code
+708: 
+709: if __name__ == '__main__':
+710:     # Ejecuta el servidor Flask en modo debug para desarrollo
+711:     app.run(debug=True, port=5000)
+712: 
+The above content shows the entire, complete file contents of the requested file.
+
+---
+Created At: 2026-06-19T00:02:19Z
+Completed At: 2026-06-19T00:02:19Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 538
+Total Bytes: 38879
+Showing lines 1 to 538
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html lang="es">
+3: <head>
+4:     <meta charset="UTF-8">
+5:     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+6:     <title>Seniat Control - Métricas de Comportamiento</title>
+7:     
+8:     <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+9:     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+10:     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+11:     <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+12:     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+13:     
+14:     <!-- FUENTE INTER LOCAL -->
+15:     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+16:     
+17:     <!-- ESTILOS PERSONALIZADOS -->
+18:     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+19: </head>
+20: <body class="flex min-h-screen overflow-hidden">
+21: 
+22:     <!-- BACKDROP SIDEBAR RESPONSIVE -->
+23:     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+24: 
+25:     <!-- SIDEBAR -->
+26:     <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
+27:         <div id="resizer" class="absolute top-0 right-0 w-1.5 
+<truncated 37909 bytes>
+-${month}-${t}">${displayDay}</td>`;
+495:                 }
+496:                 html += `</tr>`;
+497:             }
+498:             html += `</tbody></table>`;
+499:             return html;
+500:         }
+501: 
+502:         function renderUI() {
+503:             if(document.getElementById('tableQ1')) document.getElementById('tableQ1').innerHTML = buildCalendarTable(1);
+504:             if(document.getElementById('tableQ2')) document.getElementById('tableQ2').innerHTML = buildCalendarTable(2);
+505:             if(document.getElementById('tableDPP')) document.getElementById('tableDPP').innerHTML = buildCalendarDPPTable();
+506:             checkSelectedDate();
+507:         }
+508: 
+509:         window.addEventListener('DOMContentLoaded', async () => {
+510:             const today = new Date();
+511:             const yyyy = today.getFullYear();
+512:             const mm = String(today.getMonth() + 1).padStart(2, '0');
+513:             const dd = String(today.getDate()).padStart(2, '0');
+514:             
+515:             const dateInput = document.getElementById('calendarDate');
+516:             if (dateInput) {
+517:                 dateInput.value = `${yyyy}-${mm}-${dd}`;
+518:             }
+519:             
+520:             // Fetch initial calendar
+521:             await fetchCalendar(yyyy);
+522:             renderUI();
+523:         });
+524: 
+525:         // Detect if user changes the year in the date picker, fetch new calendar
+526:         let lastCalendarYear = null;
+527:         document.getElementById('calendarDate')?.addEventListener('change', async (e) => {
+528:             const year = e.target.value.split('-')[0];
+529:             if (year && year !== lastCalendarYear) {
+530:                 lastCalendarYear = year;
+531:                 await fetchCalendar(year);
+532:                 renderUI();
+533:             }
+534:         });
+535:     </script>
+536: </body>
+537: </html>
+538: 
+The above content shows the entire, complete file contents of the requested file.
+
+---
+Created At: 2026-06-19T00:03:24Z
+Completed At: 2026-06-19T00:03:24Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 538
+Total Bytes: 38879
+Showing lines 1 to 100
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html lang="es">
+3: <head>
+4:     <meta charset="UTF-8">
+5:     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+6:     <title>Seniat Control - Métricas de Comportamiento</title>
+7:     
+8:     <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+9:     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+10:     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+11:     <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+12:     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+13:     
+14:     <!-- FUENTE INTER LOCAL -->
+15:     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+16:     
+17:     <!-- ESTILOS PERSONALIZADOS -->
+18:     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+19: </head>
+20: <body class="flex min-h-screen overflow-hidden">
+21: 
+22:     <!-- BACKDROP SIDEBAR RESPONSIVE -->
+23:     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+24: 
+25:     <!-- SIDEBAR -->
+26:     <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
+27:         <div id="resizer" class="absolute top-0 right-0 w-1.5 
+<truncated 5334 bytes>
+none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+80:                         Gestión de Usuarios
+81:                     </a>
+82:                 </div>
+83:                 <button onclick="clearDatabase()" class="group cursor-pointer block w-full">
+84:                     <div class="bg-red-50 border-2 border-dashed border-red-200 hover:border-red-500 p-4 rounded-2xl text-center transition-all">
+85:                         <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 shadow-sm">
+86:                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+87:                         </div>
+88:                         <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+89:                     </div>
+90:                 </button>
+91:             </section>
+92:             {% endif %}
+93:         </div>
+94: 
+95:         <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+96:             <div class="flex items-center gap-3 overflow-hidden">
+97:                 <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+98:                     {{ current_user[0] if current_user else 'U' }}
+99:                 </div>
+100:                 <div class="overflow-hidden">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:09:15Z
+Completed At: 2026-06-19T00:09:15Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 538
+Total Bytes: 38879
+Showing lines 100 to 250
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+100:                 <div class="overflow-hidden">
+101:                     <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+102:                     <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+103:                 </div>
+104:             </div>
+105:             <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+106:                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+107:             </a>
+108:         </div>
+109:     </aside>
+110: 
+111:     <script>
+112:         const sidebar = document.getElementById('sidebar');
+113:         const resizer = document.getElementById('resizer');
+114:         let isResizing = false;
+115: 
+116:         resizer.addEventListener('mousedown', (e) => {
+117:             isResizing = true;
+118:             document.body.style.cursor = 'col-resize';
+119:             e.preventDefault();
+120:         });
+121: 
+122:         document.addEventListener('mousemove', (e) => {
+123:             if (!isResizing) return;
+124:             let newWidth = e.clientX;
+125:             if (newWidth < 200) newWidth = 200;
+126:             i
+<truncated 7017 bytes>
+ld text-slate-600 uppercase tracking-wider ml-1">Regla de Evaluación</label>
+229:                         <select id="metricRule" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+230:                             <option value="retenciones">Retenciones / IVA (Quincenal)</option>
+231:                             <option value="dpp">Anticipos ISLR / DPP (Mensual)</option>
+232:                         </select>
+233:                     </div>
+234: 
+235:                     <div class="space-y-2 group">
+236:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Mes</label>
+237:                         <select id="metricMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+238:                             <option value="">Todos</option>
+239:                             <option value="0">Enero</option>
+240:                             <option value="1">Febrero</option>
+241:                             <option value="2">Marzo</option>
+242:                             <option value="3">Abril</option>
+243:                             <option value="4">Mayo</option>
+244:                             <option value="5">Junio</option>
+245:                             <option value="6">Julio</option>
+246:                             <option value="7">Agosto</option>
+247:                             <option value="8">Septiembre</option>
+248:                             <option value="9">Octubre</option>
+249:                             <option value="10">Noviembre</option>
+250:                             <option value="11">Diciembre</option>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:09:22Z
+Completed At: 2026-06-19T00:09:22Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 538
+Total Bytes: 38879
+Showing lines 250 to 450
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+250:                             <option value="11">Diciembre</option>
+251:                         </select>
+252:                     </div>
+253: 
+254:                     <div class="space-y-2">
+255:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminales RIF (Último número)</label>
+256:                         <div class="grid grid-cols-5 gap-2">
+257:                             <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
+258:                             <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="1" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">1</span></label>
+259:                             <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">2</span></label>
+260:                             <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">3</span></lab
+<truncated 13935 bytes>
+dpp-${item.dueMonthStr}-${item.terminal}` : `cell-${item.quincena}-${item.dueMonthStr}-${item.terminal}`;
+417:                 const cell = document.getElementById(cellId);
+418:                 if (cell) {
+419:                     cell.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+420:                 }
+421:             });
+422:         }
+423: 
+424:         function selectCellDate(quincena, monthStr, terminal, day, type = 'Retenciones') {
+425:             const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+426:             const monthIdx = months.indexOf(monthStr);
+427:             
+428:             // Si hay una fecha ya seleccionada en el input, usar ese año
+429:             const dateInput = document.getElementById('calendarDate');
+430:             let year = new Date().getFullYear();
+431:             if (dateInput && dateInput.value) {
+432:                 year = dateInput.value.split('-')[0];
+433:             }
+434:             
+435:             const yyyy = year;
+436:             const mm = String(monthIdx + 1).padStart(2, '0');
+437:             const dd = String(day).padStart(2, '0');
+438:             
+439:             if (dateInput) {
+440:                 dateInput.value = `${yyyy}-${mm}-${dd}`;
+441:                 checkSelectedDate();
+442:             }
+443:         }
+444: 
+445:         function buildCalendarTable(quincena) {
+446:             const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+447:             let html = `
+448:                 <table class="w-full text-center text-xs border-collapse border border-slate-300 table-fixed">
+449:                     <thead class="bg-blue-50 text-[10px] font-black text-slate-700">
+450:                         <tr>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:13:35Z
+Completed At: 2026-06-19T00:13:35Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 538
+Total Bytes: 38879
+Showing lines 210 to 300
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+210:             <!-- FILTROS Y KPIS -->
+211:             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+212:                 <!-- Filtros Locales de Métricas -->
+213:                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm col-span-1 space-y-4">
+214:                     <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Filtros de Análisis</h3>
+215:                     
+216:                     <div class="space-y-2 group">
+217:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
+218:                         <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+219:                             <option value="">Todos</option>
+220:                             <option value="2023">2023</option>
+221:                             <option value="2024">2024</option>
+222:                             <option value="2025">2025</option>
+223:                             <option value="2026">2026</option>
+224:                         </select>
+225:                     </div>
+226: 
+227:                     <div class="space-y-2 group">
+228:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Regla de Evaluación</label>
+229:                         <select id="metricRule" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 
+<truncated 7780 bytes>
+                               <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T2</span></label>
+297:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T3</span></label>
+298:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T4</span></label>
+299:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T5</span></label>
+300:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T6</span></label>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:17:17Z
+Completed At: 2026-06-19T00:17:18Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 561
+Total Bytes: 40287
+Showing lines 200 to 350
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+200:             <div class="grid grid-cols-1 gap-8 mt-8">
+201:                 <!-- Tabla DPP -->
+202:                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+203:                     <h4 class="font-black text-lg text-slate-800 mb-2">Anticipos ISLR / DPP (Mensual):</h4>
+204:                     <div class="overflow-x-auto mt-6">
+205:                         <div id="tableDPP"></div>
+206:                     </div>
+207:                 </div>
+208:             </div>
+209:             
+210:             <!-- FILTROS Y KPIS -->
+211:             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+212:                 <!-- Filtros Locales de Métricas -->
+213:                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm col-span-1 space-y-4">
+214:                     <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Filtros de Análisis</h3>
+215:                     
+216:                     <div class="space-y-2 group">
+217:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
+218:                         <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+219:                             <option value="">Todos</option>
+220:                             <option value="2023">2023</option>
+221:                             <option value="2024">2024</option>
+<truncated 12218 bytes>
+get-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T8</span></label>
+326:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T9</span></label>
+327:                             </div>
+328:                         </div>
+329:                     </div>
+330:                 </div>
+331:                 <div class="chart-container" style="height: 350px;">
+332:                     <canvas id="comparisonBarChart"></canvas>
+333:                 </div>
+334:             </div>
+335:         </div>
+336:     </main>
+337: 
+338: 
+339:     <!-- Lógica de Calendario en la propia vista para evitar problemas de caché -->
+340:     <script>
+341:         let CALENDARIO_SENIAT_LOCAL = {
+342:             1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
+343:             2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+344:         };
+345:         let CALENDARIO_DPP_LOCAL = { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] };
+346:         const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+347:         
+348:         async function fetchCalendar(year) {
+349:             try {
+350:                 const response = await fetch(`/api/calendario/${year}`);
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:53:42Z
+Completed At: 2026-06-19T00:53:42Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 595
+Total Bytes: 44167
+Showing lines 100 to 180
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+100:                 <div class="overflow-hidden">
+101:                     <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+102:                     <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+103:                 </div>
+104:             </div>
+105:             <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+106:                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+107:             </a>
+108:         </div>
+109:     </aside>
+110: 
+111:     <script>
+112:         const sidebar = document.getElementById('sidebar');
+113:         const resizer = document.getElementById('resizer');
+114:         let isResizing = false;
+115: 
+116:         resizer.addEventListener('mousedown', (e) => {
+117:             isResizing = true;
+118:             document.body.style.cursor = 'col-resize';
+119:             e.preventDefault();
+120:         });
+121: 
+122:         document.addEventListener('mousemove', (e) => {
+123:             if (!isResizing) return;
+124:             let newWidth = e.clientX;
+125:             if (newWidth < 200) newWidth = 200;
+126:             i
+<truncated 2114 bytes>
+imientos por Fecha</h3>
+159:                         <p class="text-sm text-slate-500">Selecciona una fecha para ver qué terminales de RIF deben declarar sus impuestos correspondientes al mes anterior.</p>
+160:                     </div>
+161:                     <div class="flex items-center gap-4 shrink-0">
+162:                         <div class="space-y-1">
+163:                             <label class="text-[10px] font-bold text-slate-500 uppercase">Fecha Objetivo</label>
+164:                             <input type="date" id="calendarDate" onchange="checkSelectedDate()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none font-bold text-slate-700">
+165:                         </div>
+166:                         <button onclick="checkSelectedDate()" class="mt-5 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-md shadow-blue-600/20">
+167:                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+168:                         </button>
+169:                     </div>
+170:                 </div>
+171: 
+172:                 <!-- Contenedor Dinámico de Resultados -->
+173:                 <div>
+174:                     <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Terminales con Vencimiento</h4>
+175:                     <div id="dueTerminalsContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[140px]">
+176:                         <!-- Rellenado por JS -->
+177:                     </div>
+178:                 </div>
+179:             </div>
+180: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:53:48Z
+Completed At: 2026-06-19T00:53:48Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 595
+Total Bytes: 44167
+Showing lines 180 to 250
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+180: 
+181:             <!-- TABLAS DE CALENDARIO -->
+182:             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+183:                 <!-- Tabla Quincena 1 -->
+184:                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+185:                     <h4 class="font-black text-lg text-slate-800 mb-2">a.1) Entre los días 01 al 15 de cada mes, ambos inclusive:</h4>
+186:                     <div class="overflow-x-auto mt-6">
+187:                         <div id="tableQ1"></div>
+188:                     </div>
+189:                 </div>
+190:                 
+191:                 <!-- Tabla Quincena 2 -->
+192:                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+193:                     <h4 class="font-black text-lg text-slate-800 mb-2">a.2) Entre los días 16 y el último de cada mes, ambos inclusive:</h4>
+194:                     <div class="overflow-x-auto mt-6">
+195:                         <div id="tableQ2"></div>
+196:                     </div>
+197:                 </div>
+198:             </div>
+199:             
+200:             <div class="grid grid-cols-1 gap-8 mt-8">
+201:                 <!-- Tabla DPP -->
+202:                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+203:                     <h4 class="font-black text-lg text-slate-800 mb-2">Anticipos ISLR / DPP (Mensual):</h4>
+204:                     <div class="overflow-x-auto mt-6">
+205:                         <div id="tableDPP"></div>
+206:                     </d
+<truncated 1230 bytes>
+ 
+225:                     <div class="space-y-2 group">
+226:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Mes</label>
+227:                         <select id="metricMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+228:                             <option value="">Todos</option>
+229:                             <option value="0">Enero</option>
+230:                             <option value="1">Febrero</option>
+231:                             <option value="2">Marzo</option>
+232:                             <option value="3">Abril</option>
+233:                             <option value="4">Mayo</option>
+234:                             <option value="5">Junio</option>
+235:                             <option value="6">Julio</option>
+236:                             <option value="7">Agosto</option>
+237:                             <option value="8">Septiembre</option>
+238:                             <option value="9">Octubre</option>
+239:                             <option value="10">Noviembre</option>
+240:                             <option value="11">Diciembre</option>
+241:                         </select>
+242:                     </div>
+243:                     
+244:                     <div class="space-y-2 group">
+245:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o Dependencia</label>
+246:                         <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+247:                         </div>
+248:                     </div>
+249:                     
+250:                     <div class="space-y-2 group">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T00:55:01Z
+Completed At: 2026-06-19T00:55:01Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 595
+Total Bytes: 44167
+Showing lines 240 to 280
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+240:                             <option value="11">Diciembre</option>
+241:                         </select>
+242:                     </div>
+243:                     
+244:                     <div class="space-y-2 group">
+245:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o Dependencia</label>
+246:                         <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+247:                         </div>
+248:                     </div>
+249:                     
+250:                     <div class="space-y-2 group">
+251:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Tipos de Impuestos</label>
+252:                         <div id="impuesto-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+253:                         </div>
+254:                     </div>
+255:                 </div>
+256: 
+257:                 <div class="mt-6 space-y-2 border-t border-slate-100 pt-6">
+258:                     <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminales RIF (Último número)</label>
+259:                     <div class="flex flex-wrap gap-4">
+260:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
+2
+<truncated 1444 bytes>
+266:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">6</span></label>
+267:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">7</span></label>
+268:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
+269:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+270:                     </div>
+271:                 </div>
+272:             </div>
+273: 
+274:             <!-- SECCIONES DE ANÁLISIS DISTINTAS -->
+275:             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+276:                 <!-- SECCIÓN 1: MÉTRICAS DPP -->
+277:                 <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-md shadow-blue-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+278:                     <div>
+279:                         <div class="flex items-center gap-3 mb-6">
+280:                             <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:29:35Z
+Completed At: 2026-06-19T01:29:35Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 597
+Total Bytes: 44286
+Showing lines 300 to 370
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+300:                             <p class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+301:                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+302:                                 Retrasado
+303:                             </p>
+304:                             <h3 id="kpiRetrasoDpp" class="text-5xl font-black text-red-500 drop-shadow-sm">0%</h3>
+305:                         </div>
+306:                     </div>
+307:                 </div>
+308: 
+309:                 <!-- SECCIÓN 2: MÉTRICAS OTROS IMPUESTOS -->
+310:                 <div class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-md shadow-indigo-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+311:                     <div>
+312:                         <div class="flex items-center gap-3 mb-6">
+313:                             <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+314:                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A
+<truncated 5459 bytes>
+7:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T6</span></label>
+358:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T7</span></label>
+359:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T8</span></label>
+360:                                 <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T9</span></label>
+361:                             </div>
+362:                         </div>
+363:                     </div>
+364:                 </div>
+365:                 <div class="chart-container" style="height: 350px;">
+366:                     <canvas id="comparisonBarChart"></canvas>
+367:                 </div>
+368:             </div>
+369:         </div>
+370:     </main>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:29:42Z
+Completed At: 2026-06-19T01:29:42Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 597
+Total Bytes: 44286
+Showing lines 280 to 300
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+280:                             <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+281:                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+282:                             </div>
+283:                             <div>
+284:                                 <h3 class="font-black text-xl text-slate-800">Análisis: DPP</h3>
+285:                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anticipos ISLR y Pensiones (Mensual)</p>
+286:                             </div>
+287:                         </div>
+288:                         <p class="text-sm text-slate-500 mb-8">Esta sección evalúa exclusivamente el cumplimiento de los anticipos contra el calendario mensual propio de DPP, considerando los filtros globales aplicados.</p>
+289:                     </div>
+290:                     
+291:                     <div class="grid grid-cols-2 gap-6">
+292:                         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+293:                             <p class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+294:                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+295:                                 A Tiempo
+296:                             </p>
+297:                             <h3 id="kpiATiempoDpp" class="text-5xl font-black text-green-600 drop-shadow-sm">0%</h3>
+298:                         </div>
+299:                         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+300:                             <p class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:33:51Z
+Completed At: 2026-06-19T01:33:51Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 641
+Total Bytes: 47344
+Showing lines 1 to 40
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html lang="es">
+3: <head>
+4:     <meta charset="UTF-8">
+5:     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+6:     <title>Seniat Control - Métricas de Comportamiento</title>
+7:     
+8:     <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+9:     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+10:     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+11:     <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+12:     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+13:     
+14:     <!-- FUENTE INTER LOCAL -->
+15:     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+16:     
+17:     <!-- ESTILOS PERSONALIZADOS -->
+18:     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+19: </head>
+20: <body class="flex min-h-screen overflow-hidden">
+21: 
+22:     <!-- BACKDROP SIDEBAR RESPONSIVE -->
+23:     <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+24: 
+25:     <!-- SIDEBAR -->
+26:     <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
+27:         <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+28:         <div class="p-8 border-b border-slate-100">
+29:             <div class="flex flex-col items-center text-center gap-3">
+30:                 <div class="w-24">
+31:                     <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+32:                 </div>
+33:                 <div>
+34:                     <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-indigo-600">Control</span></h1>
+35:                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+36:                 </div>
+37:             </div>
+38:         </div>
+39: 
+40:         <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:34:23Z
+Completed At: 2026-06-19T01:34:23Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 641
+Total Bytes: 47344
+Showing lines 620 to 641
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+620:                         </thead>
+621:                         <tbody id="metricsDetailTableBody" class="divide-y divide-slate-50">
+622:                             <!-- JS inyecta filas aquí -->
+623:                         </tbody>
+624:                     </table>
+625:                 </div>
+626:             </div>
+627:             
+628:             <!-- Footer Modal -->
+629:             <div class="px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
+630:                 <button onclick="closeMetricsDetailModal()" class="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+631:                     Cerrar
+632:                 </button>
+633:             </div>
+634:         </div>
+635:     </div>
+636: 
+637:     <!-- LÓGICA PRINCIPAL (con versión para forzar recarga) -->
+638:     <script src="/static/js/app.js?v=2.2"></script>
+639: </body>
+640: </html>
+641: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:52:27Z
+Completed At: 2026-06-19T01:52:27Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 645
+Total Bytes: 47970
+Showing lines 595 to 620
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+595:     <div id="metricsDetailModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+596:         <div class="bg-white rounded-[2rem] shadow-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative border border-slate-100">
+597:             <!-- Header Modal -->
+598:             <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+599:                 <div>
+600:                     <h3 id="metricsDetailTitle" class="text-xl font-black text-slate-800">Detalle de Contribuyentes</h3>
+601:                     <p id="metricsDetailCount" class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">0 Contribuyentes</p>
+602:                 </div>
+603:                 <button onclick="closeMetricsDetailModal()" class="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-xl">
+604:                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+605:                 </button>
+606:             </div>
+607:             
+608:             <!-- Body Modal (Tabla) -->
+609:             <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-white">
+610:                 <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+611:                     <table class="w-full text-left">
+612:                         <thead class="bg-slate-50 border-b border-slate-100">
+613:                             <tr>
+614:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF</th>
+615:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social</th>
+616:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Período</th>
+617:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago</th>
+618:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">Monto</th>
+619:                             </tr>
+620:                         </thead>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T01:56:52Z
+Completed At: 2026-06-19T01:56:53Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 650
+Total Bytes: 48594
+Showing lines 605 to 620
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+605:                 </button>
+606:             </div>
+607:             
+608:             <!-- Body Modal (Tabla) -->
+609:             <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-white">
+610:                 <div class="border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
+611:                     <table class="w-full text-left whitespace-nowrap">
+612:                         <thead class="bg-slate-50 border-b border-slate-100">
+613:                             <tr>
+614:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF</th>
+615:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social</th>
+616:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Dependencia</th>
+617:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Impuesto</th>
+618:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Período</th>
+619:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago</th>
+620:                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Forma</th>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T02:20:08Z
+Completed At: 2026-06-19T02:20:08Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 651
+Total Bytes: 48721
+Showing lines 110 to 145
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+110: 
+111:     <script>
+112:         const sidebar = document.getElementById('sidebar');
+113:         const resizer = document.getElementById('resizer');
+114:         let isResizing = false;
+115: 
+116:         resizer.addEventListener('mousedown', (e) => {
+117:             isResizing = true;
+118:             document.body.style.cursor = 'col-resize';
+119:             e.preventDefault();
+120:         });
+121: 
+122:         document.addEventListener('mousemove', (e) => {
+123:             if (!isResizing) return;
+124:             let newWidth = e.clientX;
+125:             if (newWidth < 200) newWidth = 200;
+126:             if (newWidth > 800) newWidth = 800;
+127:             sidebar.style.width = newWidth + 'px';
+128:         });
+129: 
+130:         document.addEventListener('mouseup', () => {
+131:             if (isResizing) {
+132:                 isResizing = false;
+133:                 document.body.style.cursor = '';
+134:             }
+135:         });
+136:     </script>
+137: 
+138:     <!-- METRICS VIEW -->
+139:     <main id="view-metrics" class="flex-1 bg-slate-50/50 p-4 lg:p-10 h-screen overflow-y-auto custom-scrollbar relative w-full">
+140:         <div class="max-w-7xl mx-auto space-y-8">
+141:             <header class="flex items-center lg:items-end justify-between">
+142:                 <div class="flex items-center gap-3 min-w-0">
+143:                     <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-white transition-all shrink-0 bg-white">
+144:                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+145:                     </button>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T02:20:13Z
+Completed At: 2026-06-19T02:20:13Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 651
+Total Bytes: 48721
+Showing lines 60 to 110
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+60:                     <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+61:                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+62:                         Directorio
+63:                     </a>
+64:                     <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+65:                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+66:                         Historial de Lotes
+67:                     </a>
+68:                     <a href="/reportes" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+69:                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.4
+<truncated 1647 bytes>
+e-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+87:                         </div>
+88:                         <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+89:                     </div>
+90:                 </button>
+91:             </section>
+92:             {% endif %}
+93:         </div>
+94: 
+95:         <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+96:             <div class="flex items-center gap-3 overflow-hidden">
+97:                 <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+98:                     {{ current_user[0] if current_user else 'U' }}
+99:                 </div>
+100:                 <div class="overflow-hidden">
+101:                     <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+102:                     <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+103:                 </div>
+104:             </div>
+105:             <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+106:                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+107:             </a>
+108:         </div>
+109:     </aside>
+110: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T02:20:19Z
+Completed At: 2026-06-19T02:20:19Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 651
+Total Bytes: 48721
+Showing lines 200 to 260
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+200:             <div class="grid grid-cols-1 gap-8 mt-8">
+201:                 <!-- Tabla DPP -->
+202:                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+203:                     <h4 class="font-black text-lg text-slate-800 mb-2">Anticipos ISLR / DPP (Mensual):</h4>
+204:                     <div class="overflow-x-auto mt-6">
+205:                         <div id="tableDPP"></div>
+206:                     </div>
+207:                 </div>
+208:             </div>
+209:             
+210:             <!-- FILTROS GLOBALES -->
+211:             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm mt-8">
+212:                 <h3 class="font-black text-lg text-slate-800 mb-6">Filtros de Análisis</h3>
+213:                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+214:                     <div class="space-y-2 group">
+215:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
+216:                         <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+217:                             <option value="">Todos</option>
+218:                             <option value="2023">2023</option>
+219:                             <option value="2024">2024</option>
+220:                             <option value="2025">2025</option>
+221:                             <option value
+<truncated 1040 bytes>
+:                             <option value="7">Agosto</option>
+237:                             <option value="8">Septiembre</option>
+238:                             <option value="9">Octubre</option>
+239:                             <option value="10">Noviembre</option>
+240:                             <option value="11">Diciembre</option>
+241:                         </select>
+242:                     </div>
+243:                     
+244:                     <div class="space-y-2 group">
+245:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o Dependencia</label>
+246:                         <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+247:                         </div>
+248:                     </div>
+249:                     
+250:                     <div class="space-y-2 group">
+251:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Tipos de Impuestos</label>
+252:                         <div id="impuesto-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+253:                         </div>
+254:                     </div>
+255:                 </div>
+256: 
+257:                 <div class="mt-6 space-y-2 border-t border-slate-100 pt-6">
+258:                     <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminales RIF (Último número)</label>
+259:                     <div class="flex flex-wrap gap-4">
+260:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T02:21:43Z
+Completed At: 2026-06-19T02:21:43Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 639
+Total Bytes: 47109
+Showing lines 240 to 270
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+240:                             <option value="11">Diciembre</option>
+241:                         </select>
+242:                     </div>
+243:                     
+244:                     <div class="space-y-2 group">
+245:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o Dependencia</label>
+246:                         <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+247:                         </div>
+248:                     </div>
+249:                     
+250:                     <div class="space-y-2 group">
+251:                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Tipos de Impuestos</label>
+252:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">4</span></label>
+253:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">5</span></label>
+254:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><spa
+<truncated 241 bytes>
+rder-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">7</span></label>
+256:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
+257:                         <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+258:                     </div>
+259:                 </div>
+260:             </div>
+261: 
+262:             <!-- SECCIONES DE ANÁLISIS DISTINTAS -->
+263:             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+264:                 <!-- SECCIÓN 1: MÉTRICAS DPP -->
+265:                 <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-md shadow-blue-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+266:                     <div>
+267:                         <div class="flex items-center gap-3 mb-6">
+268:                             <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+269:                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+270:                             </div>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Created At: 2026-06-19T02:24:00Z
+Completed At: 2026-06-19T02:24:00Z
+File Path: `file:///c:/Users/josed/OneDrive/Desktop/seniat_modelo1/templates/metricas.html`
+Total Lines: 252
+Total Bytes: 17512
+Showing lines 252 to 252
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+252: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---

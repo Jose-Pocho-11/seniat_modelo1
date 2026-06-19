@@ -7,13 +7,17 @@
     
     <!-- LIBRERÍAS LOCALES -->
     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="flex min-h-screen overflow-hidden bg-slate-50">
 
+    <!-- BACKDROP SIDEBAR RESPONSIVE -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
+    <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
         <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
         <div class="p-8 border-b border-slate-100">
             <div class="flex flex-col items-center text-center gap-3">
@@ -39,6 +43,14 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         Métricas de Comportamiento
                     </a>
+                    
+                    
+                    <a href="/calendario" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        Calendario Fiscal
+                    </a>
+
+
                     <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 text-blue-700 font-bold transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         Directorio
@@ -47,8 +59,31 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Historial de Lotes
                     </a>
+                    <a href="/reportes" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Generación de Reportes
+                    </a>
                 </div>
             </section>
+            {% if session.get('correo') == 'admin@seniat.gob.ve' %}
+                        <section class="mt-8">
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Administración</h3>
+                <div class="space-y-2 mb-4">
+                    <a href="/usuarios" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Gestión de Usuarios
+                    </a>
+                </div>
+                <button onclick="clearDatabase()" class="group cursor-pointer block w-full">
+                    <div class="bg-red-50 border-2 border-dashed border-red-200 hover:border-red-500 p-4 rounded-2xl text-center transition-all">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </div>
+                        <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+                    </div>
+                </button>
+            </section>
+            {% endif %}
         </div>
 
         <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
@@ -95,15 +130,21 @@
     </script>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between shrink-0">
-            <div>
-                <h2 class="text-xl font-extrabold text-slate-800">Directorio de Contribuyentes</h2>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Base de Datos General</p>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        <header class="h-20 bg-white border-b border-slate-200 px-4 md:px-10 flex items-center justify-between shrink-0 gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <div class="min-w-0">
+                    <h2 class="text-xl font-extrabold text-slate-800 truncate">Directorio de Contribuyentes</h2>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest truncate">Base de Datos General</p>
+                </div>
             </div>
-            <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2 shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                Nuevo Contribuyente
+                <span class="hidden sm:inline">Nuevo Contribuyente</span>
+                <span class="sm:hidden">Nuevo</span>
             </button>
         </header>
 
@@ -222,6 +263,16 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Paginación -->
+                <div class="p-4 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="text-xs text-slate-500 font-bold">
+                        Mostrando <span id="pageStart" class="text-slate-800">0</span> a <span id="pageEnd" class="text-slate-800">0</span> de <span id="pageTotal" class="text-slate-800">0</span> registros
+                    </div>
+                    <div class="flex items-center gap-2" id="paginationControls">
+                        <!-- Botones de paginación se insertan aquí -->
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -266,6 +317,9 @@
 
     <script>
         let searchTimeout = null;
+        let currentData = [];
+        let currentPage = 1;
+        const rowsPerPage = 25;
 
         function toggleDropdown(menuId) {
             const menu = document.getElementById(menuId);
@@ -374,23 +428,32 @@
 
                 fetch(`/api/contribuyentes?${params.toString()}`)
                     .then(res => res.json())
-                    .then(data => renderTable(data))
+                    .then(data => {
+                        currentPage = 1;
+                        renderTable(data);
+                    })
                     .catch(err => console.error("Error fetching data:", err));
             }, 300);
         }
 
-        function renderTable(data) {
+        function renderTable(data = currentData) {
+            currentData = data;
             const tbody = document.getElementById('directoryBody');
             tbody.innerHTML = '';
             
-            if (data.length === 0) {
+            if (currentData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="15" class="px-6 py-8 text-center text-slate-500 italic">No se encontraron registros</td></tr>`;
+                updatePagination();
                 return;
             }
 
             const format = (val) => new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
-            data.forEach(row => {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = currentData.slice(start, end);
+
+            pageData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors';
                 tr.innerHTML = `
@@ -412,7 +475,47 @@
                 `;
                 tbody.appendChild(tr);
             });
+            updatePagination();
         }
+
+        function updatePagination() {
+            const totalRows = currentData.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = totalRows === 0 ? 0 : ((currentPage - 1) * rowsPerPage) + 1;
+            const end = Math.min(currentPage * rowsPerPage, totalRows);
+
+            const elStart = document.getElementById('pageStart');
+            const elEnd = document.getElementById('pageEnd');
+            const elTotal = document.getElementById('pageTotal');
+            const elControls = document.getElementById('paginationControls');
+
+            if (elStart) elStart.textContent = start;
+            if (elEnd) elEnd.textContent = end;
+            if (elTotal) elTotal.textContent = totalRows;
+
+            if (!elControls) return;
+
+            let controlsHtml = `
+                <button onclick="changePage(1)" class="px-3 py-1.5 text-xs font-bold rounded-lg border ${currentPage === 1 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-300 hover:bg-slate-100'}" ${currentPage === 1 ? 'disabled' : ''}>&laquo; Primera</button>
+                <button onclick="changePage(${currentPage - 1})" class="px-3 py-1.5 text-xs font-bold rounded-lg border ${currentPage === 1 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-300 hover:bg-slate-100'}" ${currentPage === 1 ? 'disabled' : ''}>&lsaquo; Ant</button>
+                <span class="text-xs font-bold text-slate-600 px-2">Página ${currentPage} de ${totalPages}</span>
+                <button onclick="changePage(${currentPage + 1})" class="px-3 py-1.5 text-xs font-bold rounded-lg border ${currentPage === totalPages ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-300 hover:bg-slate-100'}" ${currentPage === totalPages ? 'disabled' : ''}>Sig &rsaquo;</button>
+                <button onclick="changePage(${totalPages})" class="px-3 py-1.5 text-xs font-bold rounded-lg border ${currentPage === totalPages ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-300 hover:bg-slate-100'}" ${currentPage === totalPages ? 'disabled' : ''}>Última &raquo;</button>
+            `;
+
+            elControls.innerHTML = controlsHtml;
+        }
+
+        window.changePage = function(newPage) {
+            const totalPages = Math.ceil(currentData.length / rowsPerPage) || 1;
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderTable();
+            }
+        };
 
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');

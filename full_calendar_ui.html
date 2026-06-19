@@ -1,0 +1,58 @@
+<!-- PANEL DE VENCIMIENTOS -->
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm mt-8">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-slate-100 pb-8">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800 mb-2">Vencimientos por Fecha</h3>
+                        <p class="text-sm text-slate-500">Selecciona una fecha para ver qué terminales de RIF deben declarar sus impuestos correspondientes al mes anterior.</p>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Fecha Objetivo</label>
+                            <input type="date" id="calendarDate" onchange="checkSelectedDate()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none font-bold text-slate-700">
+                        </div>
+                        <button onclick="checkSelectedDate()" class="mt-5 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-md shadow-blue-600/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico de Resultados -->
+                <div>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Terminales con Vencimiento</h4>
+                    <div id="dueTerminalsContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[140px]">
+                        <!-- Rellenado por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLAS DE CALENDARIO -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                <!-- Tabla Quincena 1 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.1) Entre los días 01 al 15 de cada mes, ambos inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ1"></div>
+                    </div>
+                </div>
+                
+                <!-- Tabla Quincena 2 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.2) Entre los días 16 y el último de cada mes, ambos inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ2"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-8 mt-8">
+                <!-- Tabla DPP -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">Anticipos ISLR / DPP (Mensual):</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableDPP"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        

@@ -6,10 +6,11 @@
     <title>Seniat Control - Métricas de Comportamiento</title>
     
     <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
-    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     
     <!-- FUENTE INTER LOCAL -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
@@ -17,10 +18,13 @@
     <!-- ESTILOS PERSONALIZADOS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="flex min-h-screen overflow-hidden">
+<body class="flex min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50/20 to-blue-50/40 text-slate-800">
+
+    <!-- BACKDROP SIDEBAR RESPONSIVE -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
+    <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
         <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
         <div class="p-8 border-b border-slate-100">
             <div class="flex flex-col items-center text-center gap-3">
@@ -46,6 +50,14 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         Métricas de Comportamiento
                     </a>
+                    
+                    
+                    <a href="/calendario" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        Calendario Fiscal
+                    </a>
+
+
                     <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         Directorio
@@ -54,8 +66,31 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Historial de Lotes
                     </a>
+                    <a href="/reportes" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Generación de Reportes
+                    </a>
                 </div>
             </section>
+            {% if session.get('correo') == 'admin@seniat.gob.ve' %}
+                        <section class="mt-8">
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Administración</h3>
+                <div class="space-y-2 mb-4">
+                    <a href="/usuarios" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Gestión de Usuarios
+                    </a>
+                </div>
+                <button onclick="clearDatabase()" class="group cursor-pointer block w-full">
+                    <div class="bg-red-50 border-2 border-dashed border-red-200 hover:border-red-500 p-4 rounded-2xl text-center transition-all">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </div>
+                        <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+                    </div>
+                </button>
+            </section>
+            {% endif %}
 
             <section>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Acciones</h3>
@@ -67,6 +102,7 @@
                         <p class="text-sm font-bold text-blue-900 leading-tight">Cargar nuevo CSV / Excel</p>
                     </div>
                 </label>
+                
             </section>
 
             <section class="space-y-6">
@@ -76,7 +112,10 @@
                 </div>
                 
                 <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminal de RIF</h4>
+                    <div class="flex justify-between items-center ml-1">
+                        <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Terminal de RIF</h4>
+                        <button onclick="toggleAllTerminals('terminal-checkbox')" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest transition-colors cursor-pointer">Alternar Todos</button>
+                    </div>
                     <div class="grid grid-cols-5 gap-2" id="terminal-filters">
                         <!-- Generar checkboxes del 0 al 9 -->
                         <label class="flex flex-col items-center gap-1 cursor-pointer">
@@ -155,11 +194,16 @@
     </script>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between shrink-0">
-            <div>
-                <h2 class="text-xl font-extrabold text-slate-800">Visualización de Recaudación</h2>
-                <p id="fileStatusLabel" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Mostrando Datos de Ejemplo</p>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative w-full bg-transparent">
+        <header class="h-20 bg-white/70 backdrop-blur-md border-b border-white/50 shadow-sm px-4 md:px-10 flex items-center justify-between shrink-0 sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <div class="min-w-0">
+                    <h2 class="text-xl font-extrabold text-slate-800 truncate">Visualización de Recaudación</h2>
+                    <p id="fileStatusLabel" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest truncate">Mostrando Datos de Ejemplo</p>
+                </div>
             </div>
             <button onclick="window.print()" class="text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
@@ -169,60 +213,61 @@
         <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar animate-in">
             <!-- TARJETAS -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
-                    <button onclick="openModal('contribuyentes')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="card-stat bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 overflow-hidden relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group">
+                    <button onclick="openModal('contribuyentes')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 opacity-0 group-hover:opacity-100 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contribuyentes</p>
-                    <h3 id="statCount" class="auto-text font-black text-slate-800">0</h3>
+                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Contribuyentes</p>
+                    <h3 id="statCount" class="auto-text font-black text-slate-800 drop-shadow-sm">0</h3>
                 </div>
-                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-b-4 border-b-indigo-600 overflow-hidden relative">
-                    <button onclick="openModal('total')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="card-stat bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-xl shadow-indigo-200/50 border-b-4 border-b-indigo-500 overflow-hidden relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 group">
+                    <button onclick="openModal('total')" class="absolute top-4 right-4 text-indigo-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 opacity-0 group-hover:opacity-100 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Recaudado</p>
-                    <h3 id="statTotal" class="auto-text font-black text-indigo-700">Bs. 0,00</h3>
+                    <p class="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest mb-1">Total Recaudado</p>
+                    <h3 id="statTotal" class="auto-text font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 drop-shadow-sm">Bs. 0,00</h3>
                 </div>
-                <div class="card-stat bg-white p-6 rounded-2xl border border-indigo-100 shadow-md overflow-hidden relative">
-                    <button onclick="openModal('terminal')" class="absolute top-3 right-3 text-indigo-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="card-stat bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 overflow-hidden relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group">
+                    <button onclick="openModal('terminal')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 opacity-0 group-hover:opacity-100 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Terminal RIF (<span id="statDigit">0</span>)</p>
-                    <h3 id="statTerminal" class="auto-text font-black text-indigo-700">Bs. 0,00</h3>
+                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Terminal RIF (<span id="statDigit">0</span>)</p>
+                    <h3 id="statTerminal" class="auto-text font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-500 drop-shadow-sm">Bs. 0,00</h3>
                 </div>
-                <div class="card-stat bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
-                    <button onclick="openModal('otros')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="card-stat bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 overflow-hidden relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group">
+                    <button onclick="openModal('otros')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 opacity-0 group-hover:opacity-100 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Otros Terminales</p>
-                    <h3 id="statOthers" class="auto-text font-black text-slate-800">Bs. 0,00</h3>
+                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Otros Terminales</p>
+                    <h3 id="statOthers" class="auto-text font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-500 drop-shadow-sm">Bs. 0,00</h3>
                 </div>
             </div>
 
             <!-- GRÁFICOS -->
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
-                    <button onclick="openModal('graficoPie')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="bg-white/70 backdrop-blur-md p-8 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 relative hover:shadow-2xl transition-all duration-300">
+                    <button onclick="openModal('graficoPie')" class="absolute top-5 right-5 text-slate-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Distribución de Impuestos (%)</h4>
+                    <h4 class="font-extrabold text-xs text-indigo-400 uppercase tracking-widest mb-6">Distribución de Impuestos (%)</h4>
                     <div class="chart-container"><canvas id="pieChart"></canvas></div>
                 </div>
-                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
-                    <button onclick="openModal('graficoBar')" class="absolute top-4 right-4 text-slate-300 hover:text-indigo-600 transition-colors" title="Ver detalles">
+                <div class="bg-white/70 backdrop-blur-md p-8 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 relative hover:shadow-2xl transition-all duration-300">
+                    <button onclick="openModal('graficoBar')" class="absolute top-5 right-5 text-slate-300 hover:text-indigo-600 transition-colors bg-white/50 rounded-full p-1 backdrop-blur-sm shadow-sm" title="Ver detalles">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Top 5 Contribuyentes (Bs)</h4>
+                    <h4 class="font-extrabold text-xs text-indigo-400 uppercase tracking-widest mb-6">Recaudación por Terminal (Bs)</h4>
                     <div class="chart-container"><canvas id="barChart"></canvas></div>
                 </div>
             </div>
 
             <!-- TABLA -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-10">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h4 class="font-black text-xs text-slate-800 uppercase tracking-widest">Detalle de Contribuyentes</h4>
-                    <div class="w-full sm:w-72">
-                        <input type="text" id="tableSearch" placeholder="Buscar por Nombre, RIF..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none shadow-sm transition-all">
+            <div class="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 overflow-hidden mb-10">
+                <div class="p-6 border-b border-white/50 bg-gradient-to-r from-slate-50/80 to-indigo-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h4 class="font-extrabold text-xs text-indigo-500 uppercase tracking-widest">Detalle de Contribuyentes</h4>
+                    <div class="w-full sm:w-72 relative">
+                        <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="tableSearch" placeholder="Buscar por Nombre, RIF..." class="w-full bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/30 outline-none shadow-sm transition-all text-slate-700 placeholder-slate-400">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -242,6 +287,7 @@
                                 <th class="px-4 py-4 whitespace-nowrap">Periodo</th>
                                 <th class="px-4 py-4 whitespace-nowrap">Número de Documento</th>
                                 <th class="px-4 py-4 whitespace-nowrap">RIF Contribuyente</th>
+                                <th class="px-4 py-4 whitespace-nowrap text-center">Estado</th>
                                 <th class="px-4 py-4 whitespace-nowrap text-right">Monto</th>
                                 <th class="px-4 py-4 whitespace-nowrap">Fecha de Recaudación</th>
                             </tr>
@@ -251,21 +297,31 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Paginación -->
+                <div class="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+                    <div class="text-sm text-slate-500">
+                        Mostrando <span id="pageStart" class="font-bold text-slate-700">0</span> a <span id="pageEnd" class="font-bold text-slate-700">0</span> de <span id="pageTotal" class="font-bold text-slate-700">0</span> resultados
+                    </div>
+                    <div class="flex items-center gap-2" id="paginationControls">
+                        <!-- Botones de paginación se insertan aquí -->
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
 
     <!-- MODAL DETALLES -->
-    <div id="detailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Detalles</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 hidden items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.15)] border border-white/50 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+            <div class="p-6 border-b border-slate-100/50 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-indigo-50/30">
+                <h3 id="modalTitle" class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-indigo-800 tracking-tight">Detalles</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-            <div id="modalContent" class="p-6 overflow-y-auto flex-1">
+            <div id="modalContent" class="p-8 overflow-y-auto flex-1 custom-scrollbar">
                 <!-- Contenido dinámico -->
             </div>
         </div>
@@ -322,5 +378,7 @@
             </div>
         </div>
     </div>
+    <!-- Script Principal -->
+    <script src="/static/js/app.js?v=2.1"></script>
 </body>
 </html>
