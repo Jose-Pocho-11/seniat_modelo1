@@ -1609,7 +1609,8 @@ document.addEventListener('keydown', (e) => {
 // METRICS DETAIL MODAL
 // ==========================================
 
-function openMetricsDetailModal(type, isLate) {
+function openMetricsDetailModal(type, isLateStr) {
+    const isLate = (isLateStr === 'retrasado');
     const detailedData = filteredData.filter(row => {
         if (type === 'dpp' && !row._isDpp) return false;
         if (type === 'otros' && row._isDpp) return false;
