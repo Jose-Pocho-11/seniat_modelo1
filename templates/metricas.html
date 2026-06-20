@@ -225,11 +225,11 @@
                 <div class="flex items-center gap-3 min-w-0">
                     <button onclick="toggleSidebar()"
                         class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-white transition-all shrink-0 bg-white">
-                        
+
                     </button>
                     <div>
                         <h1 class="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                            
+
                             Métricas y Cumplimiento
                         </h1>
                         <p class="text-sm text-slate-500 font-medium mt-1">Análisis de recaudación y cumplimiento de
@@ -254,7 +254,7 @@
                         </div>
                         <button onclick="checkSelectedDate()"
                             class="mt-5 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-md shadow-blue-600/20">
-                            
+
                         </button>
                     </div>
                 </div>
@@ -418,7 +418,7 @@
                             class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
                             <p
                                 class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                
+
                                 A Tiempo
                             </p>
                             <h3 id="kpiATiempoOtros"
@@ -429,7 +429,7 @@
                             class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
                             <p
                                 class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                
+
                                 Retrasado
                             </p>
                             <h3 id="kpiRetrasoOtros"
@@ -444,20 +444,81 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <h4 class="font-black text-lg text-slate-800">Cumplimiento por Terminal (Otros Impuestos)</h4>
                         <div class="flex flex-col xl:flex-row items-start xl:items-center gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar Meses</label>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar
+                                Meses</label>
                             <div class="flex flex-wrap gap-1.5" id="compareMonthsOtrosContainer">
-                                <label class="cursor-pointer"><input type="checkbox" value="0" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Ene</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="1" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Feb</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="2" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Mar</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="3" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Abr</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="4" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">May</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="5" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Jun</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="6" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Jul</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="7" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Ago</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="8" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Sep</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="9" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Oct</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="10" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Nov</div></label>
-                                <label class="cursor-pointer"><input type="checkbox" value="11" class="peer sr-only compare-month-otros-checkbox"><div class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">Dic</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" value="0"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ene</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="1"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Feb</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="2"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Mar</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="3"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Abr</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="4"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        May</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="5"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jun</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="6"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jul</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="7"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ago</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="8"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Sep</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="9"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Oct</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="10"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Nov</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="11"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Dic</div>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -487,7 +548,7 @@
                             class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
                             <p
                                 class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                
+
                                 A Tiempo
                             </p>
                             <h3 id="kpiATiempoDpp"
@@ -498,7 +559,7 @@
                             class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
                             <p
                                 class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                
+
                                 Retrasado
                             </p>
                             <h3 id="kpiRetrasoDpp"
@@ -510,7 +571,87 @@
 
                 <!-- 4. Gráfica de Métricas DPP -->
                 <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-sm">
-                    <h4 class="font-black text-lg text-slate-800 mb-6">Cumplimiento por Terminal (DPP)</h4>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h4 class="font-black text-lg text-slate-800">Cumplimiento por Terminal (DPP)</h4>
+                        <div class="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar
+                                Meses</label>
+                            <div class="flex flex-wrap gap-1.5" id="compareMonthsDppContainer">
+                                <label class="cursor-pointer"><input type="checkbox" value="0"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ene</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="1"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Feb</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="2"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Mar</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="3"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Abr</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="4"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        May</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="5"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jun</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="6"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jul</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="7"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ago</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="8"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Sep</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="9"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Oct</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="10"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Nov</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="11"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Dic</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="h-80 w-full">
                         <canvas id="metricsBarChartDpp"></canvas>
                     </div>
@@ -537,14 +678,23 @@
                 </div>
                 <button onclick="closeMetricsDetailModal()"
                     class="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 p-2 rounded-full transition-colors border border-slate-200 shadow-sm">
-                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
             </div>
 
             <div class="px-8 py-3 bg-white border-b border-slate-100 flex justify-end shrink-0">
                 <button onclick="exportMetricsDetailToCSV()"
                     class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors border border-green-200 shadow-sm cursor-pointer">
-                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
                     Exportar a Excel
                 </button>
             </div>
@@ -555,23 +705,33 @@
                     <table class="w-full text-left whitespace-nowrap">
                         <thead class="bg-slate-50 border-b border-slate-100">
                             <tr>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF</th>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Forma
                                 </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Forma</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Dep</th>
                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Dependencia
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Banco
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Banco</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Tipo Doc
                                 </th>
                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Impuesto
                                 </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF
+                                    Retenedor</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social
+                                </th>
                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Período</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Nro Doc</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF
+                                    Contribuyente</th>
                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Límite
                                 </th>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago
-                                </th>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Forma</th>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Banco</th>
-                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Nro Doc</th>
                                 <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">
                                     Monto</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="metricsDetailTableBody">
@@ -597,7 +757,7 @@
                     Detalles</h3>
                 <button onclick="closeModal()"
                     class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-all">
-                    
+
                 </button>
             </div>
             <div id="modalContent" class="p-8 overflow-y-auto flex-1 custom-scrollbar">
@@ -618,7 +778,7 @@
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h2 class="text-lg font-extrabold text-slate-800">Cargar Archivos de Recaudación</h2>
                 <button id="closeUploadModalBtn" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    
+
                 </button>
             </div>
 
@@ -629,7 +789,7 @@
                         class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-8 text-center transition-all bg-slate-50 group-hover:bg-blue-50">
                         <div
                             class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 group-hover:text-blue-500 shadow-sm transition-colors">
-                            
+
                         </div>
                         <p class="text-base font-bold text-slate-700 mb-1">Arrastra tus archivos aquí</p>
                         <p class="text-xs text-slate-500">o haz clic para explorar en tu equipo</p>

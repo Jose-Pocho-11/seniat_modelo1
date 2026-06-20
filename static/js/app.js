@@ -157,6 +157,9 @@ function updateUI() {
     const compareMonthCheckboxes = document.querySelectorAll('.compare-month-otros-checkbox:checked');
     const compareMonths = Array.from(compareMonthCheckboxes).map(cb => cb.value);
 
+    const compareMonthDppCheckboxes = document.querySelectorAll('.compare-month-dpp-checkbox:checked');
+    const compareMonthsDpp = Array.from(compareMonthDppCheckboxes).map(cb => cb.value);
+
     let stats = {
         total: 0, term: 0, groups: {}, visible: 0, uniqueRifs: new Set(), topTerminals: {},
         compliance: {
@@ -169,7 +172,7 @@ function updateUI() {
                 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
             }
         },
-        complianceDpp: { 
+        complianceDpp: {
             evaluadas: 0, aTiempo: 0, retraso: 0,
             byTerminal: {
                 0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 },
@@ -179,7 +182,7 @@ function updateUI() {
                 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
             }
         },
-        complianceOtros: { 
+        complianceOtros: {
             evaluadas: 0, aTiempo: 0, retraso: 0,
             byTerminal: {
                 0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 },
@@ -189,7 +192,8 @@ function updateUI() {
                 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 }
             }
         },
-        complianceOtrosByMonth: {}
+        complianceOtrosByMonth: {},
+        complianceDppByMonth: {}
     };
 
     const parseDate = (str) => {
@@ -246,6 +250,15 @@ function updateUI() {
         const rifContribuyente = row['RIF Contribuyente'] || row['RIF.1'] || '';
         const fechaRec = row['Fecha de Recaudación'] || row['Fecha Recaudación'] || row['Fechas de Recaudación'] || '';
 
+        // Filtros globales basados estrictamente en el Periodo
+        const dPeriodo = parseDate(periodo);
+        if (dPeriodo) {
+            if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) return;
+            if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) return;
+        } else {
+            if (metricYear || metricMonth) return;
+        }
+
         // Filtrar por Dependencia si está seleccionada
         if (dependenciaSelected.length > 0 && !dependenciaSelected.includes(reg)) return;
 
@@ -296,43 +309,53 @@ function updateUI() {
                 estadoHtml = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold">Retrasado</span>';
             }
 
-            let passMetricFilters = true;
-            const dPeriodo = parseDate(periodo);
-
             if (dPeriodo) {
-                if (metricYear && dPeriodo.getFullYear().toString() !== metricYear) passMetricFilters = false;
-
                 // --- MONTH COMPARISON LOGIC ---
                 if (!isDpp && onTime !== null && metricTerminals.includes(lastNum)) {
-                    // Si pasa el filtro de año, lo consideramos para la comparación de meses
-                    if (!metricYear || dPeriodo.getFullYear().toString() === metricYear) {
-                        const mStr = dPeriodo.getMonth().toString();
-                        if (compareMonths.includes(mStr)) {
-                            if (!stats.complianceOtrosByMonth[mStr]) {
-                                stats.complianceOtrosByMonth[mStr] = {
-                                    evaluadas: 0, aTiempo: 0, retraso: 0,
-                                    byTerminal: { 0: {aTiempo:0,retraso:0}, 1: {aTiempo:0,retraso:0}, 2: {aTiempo:0,retraso:0}, 3: {aTiempo:0,retraso:0}, 4: {aTiempo:0,retraso:0}, 5: {aTiempo:0,retraso:0}, 6: {aTiempo:0,retraso:0}, 7: {aTiempo:0,retraso:0}, 8: {aTiempo:0,retraso:0}, 9: {aTiempo:0,retraso:0} }
-                                };
-                            }
-                            const terminalNum = parseInt(lastNum, 10);
-                            stats.complianceOtrosByMonth[mStr].evaluadas++;
-                            if (onTime) {
-                                stats.complianceOtrosByMonth[mStr].aTiempo++;
-                                if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].aTiempo++;
-                            } else {
-                                stats.complianceOtrosByMonth[mStr].retraso++;
-                                if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].retraso++;
-                            }
+                    const mStr = dPeriodo.getMonth().toString();
+                    if (compareMonths.includes(mStr)) {
+                        if (!stats.complianceOtrosByMonth[mStr]) {
+                            stats.complianceOtrosByMonth[mStr] = {
+                                evaluadas: 0, aTiempo: 0, retraso: 0,
+                                byTerminal: { 0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 }, 2: { aTiempo: 0, retraso: 0 }, 3: { aTiempo: 0, retraso: 0 }, 4: { aTiempo: 0, retraso: 0 }, 5: { aTiempo: 0, retraso: 0 }, 6: { aTiempo: 0, retraso: 0 }, 7: { aTiempo: 0, retraso: 0 }, 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 } }
+                            };
+                        }
+                        const terminalNum = parseInt(lastNum, 10);
+                        stats.complianceOtrosByMonth[mStr].evaluadas++;
+                        if (onTime) {
+                            stats.complianceOtrosByMonth[mStr].aTiempo++;
+                            if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].aTiempo++;
+                        } else {
+                            stats.complianceOtrosByMonth[mStr].retraso++;
+                            if (!isNaN(terminalNum)) stats.complianceOtrosByMonth[mStr].byTerminal[terminalNum].retraso++;
                         }
                     }
                 }
 
-                if (metricMonth && dPeriodo.getMonth().toString() !== metricMonth) passMetricFilters = false;
-            } else {
-                if (metricYear || metricMonth) passMetricFilters = false;
+                // --- MONTH COMPARISON LOGIC FOR DPP ---
+                if (isDpp && onTime !== null && metricTerminals.includes(lastNum)) {
+                    const mStr = dPeriodo.getMonth().toString();
+                    if (compareMonthsDpp.includes(mStr)) {
+                        if (!stats.complianceDppByMonth[mStr]) {
+                            stats.complianceDppByMonth[mStr] = {
+                                evaluadas: 0, aTiempo: 0, retraso: 0,
+                                byTerminal: { 0: { aTiempo: 0, retraso: 0 }, 1: { aTiempo: 0, retraso: 0 }, 2: { aTiempo: 0, retraso: 0 }, 3: { aTiempo: 0, retraso: 0 }, 4: { aTiempo: 0, retraso: 0 }, 5: { aTiempo: 0, retraso: 0 }, 6: { aTiempo: 0, retraso: 0 }, 7: { aTiempo: 0, retraso: 0 }, 8: { aTiempo: 0, retraso: 0 }, 9: { aTiempo: 0, retraso: 0 } }
+                            };
+                        }
+                        const terminalNum = parseInt(lastNum, 10);
+                        stats.complianceDppByMonth[mStr].evaluadas++;
+                        if (onTime) {
+                            stats.complianceDppByMonth[mStr].aTiempo++;
+                            if (!isNaN(terminalNum)) stats.complianceDppByMonth[mStr].byTerminal[terminalNum].aTiempo++;
+                        } else {
+                            stats.complianceDppByMonth[mStr].retraso++;
+                            if (!isNaN(terminalNum)) stats.complianceDppByMonth[mStr].byTerminal[terminalNum].retraso++;
+                        }
+                    }
+                }
             }
 
-            if (passMetricFilters && metricTerminals.includes(lastNum)) {
+            if (metricTerminals.includes(lastNum)) {
                 if (onTime !== null) {
                     const terminalNum = parseInt(lastNum, 10);
                     stats.compliance.evaluadas++;
@@ -391,7 +414,7 @@ function updateUI() {
         statOthers.title = format(stats.total - stats.term);
     }
 
-    renderCharts(stats.groups, stats.total, stats.topTerminals, stats.compliance, stats.complianceDpp, stats.complianceOtros, stats.complianceOtrosByMonth, compareMonths);
+    renderCharts(stats.groups, stats.total, stats.topTerminals, stats.compliance, stats.complianceDpp, stats.complianceOtros, stats.complianceOtrosByMonth, compareMonths, stats.complianceDppByMonth, compareMonthsDpp);
 }
 
 function renderTablePage() {
@@ -487,7 +510,7 @@ window.changePage = function (newPage) {
     }
 };
 
-function renderCharts(groups, total, topTerminals, compliance, complianceDpp, complianceOtros, complianceOtrosByMonth, compareMonths) {
+function renderCharts(groups, total, topTerminals, compliance, complianceDpp, complianceOtros, complianceOtrosByMonth, compareMonths, complianceDppByMonth, compareMonthsDpp) {
     const labels = Object.keys(groups);
     const data = Object.values(groups);
     const colors = ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -647,26 +670,49 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
         const ctxOtros = document.getElementById('metricsBarChartOtros');
         if (ctxOtros) {
             if (charts['metricsBarOtros']) charts['metricsBarOtros'].destroy();
-            
+
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            // Use an array of colors for the datasets
-            const colors = ['#4338ca', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#eab308', '#a855f7'];
-            
+            // Tonos oscuros para "A Tiempo" y claros para "Retrasado", manteniendo un color base único por mes
+            const darkShades =  ['#1d4ed8', '#15803d', '#b91c1c', '#c2410c', '#7e22ce', '#0e7490', '#be185d', '#0f766e', '#4338ca', '#a16207', '#6d28d9', '#334155'];
+            const lightShades = ['#60a5fa', '#4ade80', '#f87171', '#fb923c', '#c084fc', '#22d3ee', '#f472b6', '#2dd4bf', '#818cf8', '#facc15', '#a78bfa', '#94a3b8'];
+
             const datasets = [];
             compareMonths.forEach((mStr, idx) => {
                 const complianceData = complianceOtrosByMonth[mStr];
                 const dataATiempo = termLabels.filter(t => metricTerminals.includes(t)).map(t => {
                     if (!complianceData) return 0;
                     const aTiempo = complianceData.byTerminal[t].aTiempo;
-                    const total = aTiempo + complianceData.byTerminal[t].retraso;
-                    return total > 0 ? ((aTiempo / total) * 100).toFixed(1) : 0;
+                    const retraso = complianceData.byTerminal[t].retraso;
+                    const total = aTiempo + retraso;
+                    return total > 0 ? parseFloat(((aTiempo / total) * 100).toFixed(1)) : 0;
+                });
+                const dataRetraso = termLabels.filter(t => metricTerminals.includes(t)).map(t => {
+                    if (!complianceData) return 0;
+                    const aTiempo = complianceData.byTerminal[t].aTiempo;
+                    const retraso = complianceData.byTerminal[t].retraso;
+                    const total = aTiempo + retraso;
+                    return total > 0 ? parseFloat(((retraso / total) * 100).toFixed(1)) : 0;
+                });
+
+                const mIdx = parseInt(mStr, 10);
+                const monthName = monthNames[mIdx];
+
+                datasets.push({
+                    label: `${monthName} (A Tiempo)`,
+                    data: dataATiempo,
+                    backgroundColor: darkShades[mIdx % darkShades.length],
+                    borderRadius: 6,
+                    _isLate: 'a_tiempo',
+                    _mStr: mStr
                 });
                 
                 datasets.push({
-                    label: `${monthNames[parseInt(mStr)]} (% A Tiempo)`,
-                    data: dataATiempo,
-                    backgroundColor: colors[idx % colors.length],
-                    borderRadius: 6
+                    label: `${monthName} (Retrasado)`,
+                    data: dataRetraso,
+                    backgroundColor: lightShades[mIdx % lightShades.length],
+                    borderRadius: 6,
+                    _isLate: 'retrasado',
+                    _mStr: mStr
                 });
             });
 
@@ -680,7 +726,8 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
+                        x: { stacked: false },
+                        y: { stacked: false, beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
                     },
                     plugins: {
                         legend: { display: true, position: 'top' },
@@ -692,9 +739,12 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
                     },
                     onClick: (e, elements) => {
                         if (elements.length > 0) {
-                            const index = elements[0].index;
+                            const element = elements[0];
+                            const datasetIndex = element.datasetIndex;
+                            const index = element.index;
                             const terminal = metricTerminals[index];
-                            openMetricsDetailModal('otros', 'a_tiempo', terminal);
+                            const clickedDataset = datasets[datasetIndex];
+                            openMetricsDetailModal('otros', clickedDataset._isLate, terminal, clickedDataset._mStr);
                         }
                     }
                 }
@@ -704,7 +754,94 @@ function renderCharts(groups, total, topTerminals, compliance, complianceDpp, co
         if (complianceOtros && complianceOtros.byTerminal) renderSubChart('metricsBarChartOtros', complianceOtros, 'metricsBarOtros');
     }
 
-    if (complianceDpp && complianceDpp.byTerminal) renderSubChart('metricsBarChartDpp', complianceDpp, 'metricsBarDpp');
+    if (compareMonthsDpp && compareMonthsDpp.length > 0) {
+        // Multi-month comparison rendering for DPP
+        const ctxDpp = document.getElementById('metricsBarChartDpp');
+        if (ctxDpp) {
+            if (charts['metricsBarDpp']) charts['metricsBarDpp'].destroy();
+
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            // Tonos oscuros para "A Tiempo" y claros para "Retrasado", manteniendo un color base único por mes
+            const darkShades =  ['#1d4ed8', '#15803d', '#b91c1c', '#c2410c', '#7e22ce', '#0e7490', '#be185d', '#0f766e', '#4338ca', '#a16207', '#6d28d9', '#334155'];
+            const lightShades = ['#60a5fa', '#4ade80', '#f87171', '#fb923c', '#c084fc', '#22d3ee', '#f472b6', '#2dd4bf', '#818cf8', '#facc15', '#a78bfa', '#94a3b8'];
+
+            const datasets = [];
+            compareMonthsDpp.forEach((mStr, idx) => {
+                const complianceData = complianceDppByMonth[mStr];
+                const dataATiempo = termLabels.filter(t => metricTerminals.includes(t)).map(t => {
+                    if (!complianceData) return 0;
+                    const aTiempo = complianceData.byTerminal[t].aTiempo;
+                    const retraso = complianceData.byTerminal[t].retraso;
+                    const total = aTiempo + retraso;
+                    return total > 0 ? parseFloat(((aTiempo / total) * 100).toFixed(1)) : 0;
+                });
+                const dataRetraso = termLabels.filter(t => metricTerminals.includes(t)).map(t => {
+                    if (!complianceData) return 0;
+                    const aTiempo = complianceData.byTerminal[t].aTiempo;
+                    const retraso = complianceData.byTerminal[t].retraso;
+                    const total = aTiempo + retraso;
+                    return total > 0 ? parseFloat(((retraso / total) * 100).toFixed(1)) : 0;
+                });
+
+                const mIdx = parseInt(mStr, 10);
+                const monthName = monthNames[mIdx];
+
+                datasets.push({
+                    label: `${monthName} (A Tiempo)`,
+                    data: dataATiempo,
+                    backgroundColor: darkShades[mIdx % darkShades.length],
+                    borderRadius: 6,
+                    _isLate: 'a_tiempo',
+                    _mStr: mStr
+                });
+                
+                datasets.push({
+                    label: `${monthName} (Retrasado)`,
+                    data: dataRetraso,
+                    backgroundColor: lightShades[mIdx % lightShades.length],
+                    borderRadius: 6,
+                    _isLate: 'retrasado',
+                    _mStr: mStr
+                });
+            });
+
+            charts['metricsBarDpp'] = new Chart(ctxDpp, {
+                type: 'bar',
+                data: {
+                    labels: filteredLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: false },
+                        y: { stacked: false, beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: (item) => item.dataset.label + ': ' + item.raw + '%'
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const element = elements[0];
+                            const datasetIndex = element.datasetIndex;
+                            const index = element.index;
+                            const terminal = metricTerminals[index];
+                            const clickedDataset = datasets[datasetIndex];
+                            openMetricsDetailModal('dpp', clickedDataset._isLate, terminal, clickedDataset._mStr);
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        if (complianceDpp && complianceDpp.byTerminal) renderSubChart('metricsBarChartDpp', complianceDpp, 'metricsBarDpp');
+    }
     // Llamar a la gráfica histórica
     if (typeof renderHistoricalChart === 'function') {
         renderHistoricalChart();
@@ -733,7 +870,11 @@ if (tableSearch) tableSearch.addEventListener('input', updateUI);
 
 const metricYearListener = document.getElementById('metricYear');
 if (metricYearListener) metricYearListener.addEventListener('change', async () => {
-    if (metricYearListener.value) await fetchCalendarForYear(metricYearListener.value);
+    if (metricYearListener.value) {
+        await fetchCalendarForYear(metricYearListener.value);
+        // Pre-cargar el calendario del año siguiente por declaraciones como DPP que vencen el próximo año
+        await fetchCalendarForYear((parseInt(metricYearListener.value) + 1).toString());
+    }
     updateUI();
 });
 
@@ -742,6 +883,9 @@ if (metricMonthListener) metricMonthListener.addEventListener('change', updateUI
 
 const compareMonthsOtrosCheckboxes = document.querySelectorAll('.compare-month-otros-checkbox');
 compareMonthsOtrosCheckboxes.forEach(cb => cb.addEventListener('change', updateUI));
+
+const compareMonthsDppCheckboxes = document.querySelectorAll('.compare-month-dpp-checkbox');
+compareMonthsDppCheckboxes.forEach(cb => cb.addEventListener('change', updateUI));
 
 const metricRuleListener = document.getElementById('metricRule');
 if (metricRuleListener) metricRuleListener.addEventListener('change', updateUI);
@@ -1581,9 +1725,43 @@ document.addEventListener('keydown', (e) => {
 // METRICS DETAIL MODAL
 // ==========================================
 
-function openMetricsDetailModal(type, isLateStr, terminalFilter = null) {
+function openMetricsDetailModal(type, isLateStr, terminalFilter = null, monthFilter = null) {
     const isLate = (isLateStr === 'retrasado');
+
+    const parseDateLocal = (str) => {
+        if (!str || typeof str !== 'string') return null;
+        let s = str.trim();
+        if (s.includes(' ')) s = s.split(' ')[0];
+        let parts = s.split(/[-/]/);
+        if (parts.length === 2) {
+            if (parts[1] && parts[1].length === 4) {
+                const yearStr = parts[1].substring(0, 2);
+                const monthStr = parts[1].substring(2, 4);
+                return new Date(2000 + parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1);
+            }
+            const part0 = parseInt(parts[0], 10);
+            const part1 = parseInt(parts[1], 10);
+            if (part0 > 1000) return new Date(part0, part1 - 1, 1);
+            return new Date(part1, part0 - 1, 1);
+        }
+        if (parts.length >= 3) {
+            const part0 = parseInt(parts[0], 10);
+            const part1 = parseInt(parts[1], 10);
+            const part2 = parseInt(parts[2], 10);
+            if (part0 > 31) return new Date(part0, part1 - 1, part2);
+            return new Date(part2, part1 - 1, part0);
+        }
+        return null;
+    };
+
     const detailedData = filteredData.filter(row => {
+        if (monthFilter !== null) {
+            // Filtrar directamente por el mes cliqueado en el gráfico de comparación (basado en Periodo)
+            const dPeriodo = parseDateLocal(row['Período'] || row['Periodo']);
+            if (!dPeriodo) return false;
+            if (dPeriodo.getMonth().toString() !== monthFilter) return false;
+        }
+
         if (type === 'dpp' && !row._isDpp) return false;
         if (type === 'otros' && row._isDpp) return false;
         if (terminalFilter !== null) {
@@ -1604,31 +1782,41 @@ function openMetricsDetailModal(type, isLateStr, terminalFilter = null) {
         tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500 font-bold">No hay registros para mostrar.</td></tr>';
     } else {
         tbody.innerHTML = detailedData.map(row => {
-            const rif = String(row['RIF.1'] || row['RIF'] || '');
-            const razon = row['Razón Social'] || '';
-            const dep = row['Dependencia'] || '';
-            const imp = row['Impuesto'] || '';
-            const periodo = row['Período'] || '';
-            const limite = row._dueDateStr || 'N/D';
-            const pago = row['Fecha de Recaudación'] || '';
+            const codForma = row['Código Forma'] || '';
             const forma = row['Forma'] || '';
+            const codDep = row['Código Dependencia'] || '';
+            const dep = row['Dependencia'] || '';
+            const codBanco = row['Código Banco'] || '';
             const banco = row['Banco'] || '';
+            const tipoDoc = row['Tipo de Documento'] || '';
+            const imp = row['Impuesto'] || '';
+            const rifRetenedor = row['RIF'] || '';
+            const razon = row['Razón Social'] || '';
+            const periodo = row['Período'] || '';
             const numDoc = row['Número de Documento'] || '';
+            const rifContribuyente = row['RIF Contribuyente'] || row['RIF.1'] || '';
+            const limite = row._dueDateStr || 'N/D';
+            const pago = row['Fecha de Recaudación'] || row['Fecha Recaudación'] || row['Fechas de Recaudación'] || '';
             const montoFormateado = "Bs. " + new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row._montoFloat);
 
             return `
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors text-sm">
-                    <td class="p-3 font-bold text-slate-700">${rif}</td>
-                    <td class="p-3 text-slate-600 truncate max-w-[150px]" title="${razon}">${razon}</td>
+                    <td class="p-3 text-slate-600">${codForma}</td>
+                    <td class="p-3 text-slate-600 font-bold">${forma}</td>
+                    <td class="p-3 text-slate-600">${codDep}</td>
                     <td class="p-3 text-slate-500 truncate max-w-[150px]" title="${dep}">${dep}</td>
-                    <td class="p-3 text-slate-500 truncate max-w-[150px]" title="${imp}">${imp}</td>
-                    <td class="p-3 text-slate-500">${periodo}</td>
-                    <td class="p-3 text-slate-500 font-medium">${limite}</td>
-                    <td class="p-3 text-slate-500">${pago}</td>
-                    <td class="p-3 text-slate-500">${forma}</td>
+                    <td class="p-3 text-slate-600">${codBanco}</td>
                     <td class="p-3 text-slate-500 truncate max-w-[150px]" title="${banco}">${banco}</td>
+                    <td class="p-3 text-slate-500">${tipoDoc}</td>
+                    <td class="p-3 text-slate-500 truncate max-w-[150px]" title="${imp}">${imp}</td>
+                    <td class="p-3 font-mono text-indigo-600 text-xs">${rifRetenedor}</td>
+                    <td class="p-3 text-slate-600 truncate max-w-[150px]" title="${razon}">${razon}</td>
+                    <td class="p-3 text-slate-500">${periodo}</td>
                     <td class="p-3 text-slate-500">${numDoc}</td>
+                    <td class="p-3 font-mono text-indigo-600 text-xs">${rifContribuyente}</td>
+                    <td class="p-3 text-slate-500 font-medium">${limite}</td>
                     <td class="p-3 font-bold text-slate-800 text-right">${montoFormateado}</td>
+                    <td class="p-3 text-slate-500">${pago}</td>
                 </tr>
             `;
         }).join('');
@@ -1676,33 +1864,28 @@ function exportMetricsDetailToCSV() {
     }
 
     let csvContent = "\uFEFF"; // BOM para compatibilidad con Excel
-    csvContent += "RIF;Razón Social;Dependencia;Impuesto;Período;Fecha Límite;Fecha de Recaudación;Forma;Banco;Nro Documento;Monto\n";
+    csvContent += "Cód Forma;Forma;Cód Dep;Dependencia;Cód Banco;Banco;Tipo Doc;Impuesto;RIF Retenedor;Razón Social;Período;Nro Doc;RIF Contribuyente;Fecha Límite;Monto;Fecha de Recaudación\n";
 
     window.currentDetailedData.forEach(row => {
-        const rif = String(row['RIF.1'] || row['RIF'] || '');
-        let razon = row['Razón Social'] || '';
-        razon = razon.replace(/"/g, '""'); // Escapar comillas para CSV
-
-        let dep = row['Dependencia'] || '';
-        dep = dep.replace(/"/g, '""');
-
-        let imp = row['Impuesto'] || '';
-        imp = imp.replace(/"/g, '""');
-
-        const periodo = row['Período'] || '';
-        const limite = row._dueDateStr || 'N/D';
-        const pago = row['Fecha de Recaudación'] || '';
-        const forma = row['Forma'] || '';
-
-        let banco = row['Banco'] || '';
-        banco = banco.replace(/"/g, '""');
-
+        const codForma = String(row['Código Forma'] || '').replace(/"/g, '""');
+        const forma = String(row['Forma'] || '').replace(/"/g, '""');
+        const codDep = String(row['Código Dependencia'] || '').replace(/"/g, '""');
+        let dep = String(row['Dependencia'] || '').replace(/"/g, '""');
+        const codBanco = String(row['Código Banco'] || '').replace(/"/g, '""');
+        let banco = String(row['Banco'] || '').replace(/"/g, '""');
+        const tipoDoc = String(row['Tipo de Documento'] || '').replace(/"/g, '""');
+        let imp = String(row['Impuesto'] || '').replace(/"/g, '""');
+        const rifRetenedor = String(row['RIF'] || '').replace(/"/g, '""');
+        let razon = String(row['Razón Social'] || '').replace(/"/g, '""');
+        const periodo = String(row['Período'] || '').replace(/"/g, '""');
         const numDoc = String(row['Número de Documento'] || '').replace(/"/g, '""');
+        const rifContribuyente = String(row['RIF Contribuyente'] || row['RIF.1'] || '').replace(/"/g, '""');
+        const limite = row._dueDateStr || 'N/D';
+        const pago = String(row['Fecha de Recaudación'] || row['Fecha Recaudación'] || row['Fechas de Recaudación'] || '').replace(/"/g, '""');
 
-        // En Venezuela se usa coma para decimales, por lo que el separador de CSV debe ser punto y coma
         let valStr = String(row['Monto'] || '0');
 
-        csvContent += `"${rif}";"${razon}";"${dep}";"${imp}";"${periodo}";"${limite}";"${pago}";"${forma}";"${banco}";"${numDoc}";"${valStr}"\n`;
+        csvContent += `"${codForma}";"${forma}";"${codDep}";"${dep}";"${codBanco}";"${banco}";"${tipoDoc}";"${imp}";"${rifRetenedor}";"${razon}";"${periodo}";"${numDoc}";"${rifContribuyente}";"${limite}";"${valStr}";"${pago}"\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
