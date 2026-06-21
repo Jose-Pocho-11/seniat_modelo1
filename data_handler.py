@@ -190,7 +190,7 @@ def process_files(file_list):
     except Exception as e:
         return {"error": f"Error al procesar los archivos: {str(e)}"}, 500
 
-DB_PATH = r"C:\Users\josed\OneDrive\Desktop\Seniat_DB\seniat.db"
+from init_db import DB_PATH
 
 def get_calendar_for_year(anio):
     """

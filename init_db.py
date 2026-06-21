@@ -2,8 +2,7 @@ import sqlite3
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DESKTOP_DIR = os.path.dirname(BASE_DIR)
-DB_FOLDER = os.path.join(DESKTOP_DIR, 'Seniat_DB')
+DB_FOLDER = os.path.join(BASE_DIR, 'Seniat_DB')
 DB_PATH = os.path.join(DB_FOLDER, 'seniat.db')
 
 def init_db():

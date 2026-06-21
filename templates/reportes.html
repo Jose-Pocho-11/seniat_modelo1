@@ -137,13 +137,7 @@
                         <div class="flex flex-wrap gap-4 items-end">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1">Año</label>
-                                <select id="filterYear" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-32 p-2.5 font-medium transition-colors">
-                                    <option value="">Todos</option>
-                                    <option value="2025" selected>2025</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                </select>
+                                <input type="number" id="filterYear" value="2025" min="2000" max="2100" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-32 p-2.5 font-medium transition-colors" placeholder="Ej: 2024">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1">Mes</label>

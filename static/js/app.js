@@ -9,9 +9,50 @@ const format = (n) => "Bs. " + new Intl.NumberFormat('es-VE', { minimumFractionD
 
 const getCheckedValues = (selector) => Array.from(document.querySelectorAll(selector + ':checked')).map(cb => cb.value);
 
-let CALENDARIO_SENIAT = {
-    1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
-    2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+const CALENDARIO_SENIAT = {
+    1: {
+        ENE: { 0:28, 1:19, 2:21, 3:30, 4:23, 5:22, 6:20, 7:27, 8:26, 9:29 },
+        FEB: { 0:20, 1:23, 2:18, 3:18, 4:25, 5:27, 6:19, 7:24, 8:26, 9:27 },
+        MAR: { 0:25, 1:20, 2:24, 3:23, 4:26, 5:30, 6:27, 7:18, 8:31, 9:17 },
+        ABR: { 0:23, 1:27, 2:21, 3:30, 4:20, 5:22, 6:24, 7:17, 8:29, 9:28 },
+        MAY: { 0:20, 1:18, 2:29, 3:22, 4:21, 5:28, 6:19, 7:26, 8:27, 9:25 },
+        JUN: { 0:29, 1:26, 2:16, 3:18, 4:19, 5:17, 6:30, 7:22, 8:23, 9:25 },
+        JUL: { 0:27, 1:21, 2:30, 3:23, 4:28, 5:22, 6:20, 7:31, 8:17, 9:29 },
+        AGO: { 0:31, 1:25, 2:24, 3:18, 4:19, 5:21, 6:28, 7:20, 8:26, 9:27 },
+        SEP: { 0:29, 1:18, 2:24, 3:21, 4:30, 5:25, 6:28, 7:22, 8:17, 9:23 },
+        OCT: { 0:20, 1:28, 2:29, 3:23, 4:22, 5:30, 6:21, 7:27, 8:26, 9:19 },
+        NOV: { 0:27, 1:26, 2:17, 3:23, 4:20, 5:18, 6:25, 7:19, 8:24, 9:30 },
+        DIC: { 0:16, 1:29, 2:21, 3:28, 4:22, 5:17, 6:18, 7:18, 8:30, 9:23 }
+    },
+    2: {
+        ENE: { 0:15, 1:6,  2:8,  3:16, 4:9,  5:5,  6:13, 7:12, 8:7,  9:14 },
+        FEB: { 0:9,  1:10, 2:5,  3:12, 4:2,  5:13, 6:4,  7:11, 8:3,  9:6  },
+        MAR: { 0:6,  1:3,  2:9,  3:4,  4:11, 5:12, 6:10, 7:2,  8:13, 9:5  },
+        ABR: { 0:1,  1:14, 2:8,  3:16, 4:7,  5:9,  6:13, 7:6,  8:10, 9:15 },
+        MAY: { 0:6,  1:4,  2:14, 3:7,  4:13, 5:15, 6:5,  7:11, 8:12, 9:8  },
+        JUN: { 0:12, 1:11, 2:3,  3:10, 4:2,  5:8,  6:15, 7:4,  8:5,  9:9  },
+        JUL: { 0:8,  1:3,  2:14, 3:7,  4:10, 5:6,  6:9,  7:15, 8:2,  9:13 },
+        AGO: { 0:14, 1:13, 2:12, 3:5,  4:6,  5:3,  6:4,  7:10, 8:7,  9:11 },
+        SEP: { 0:14, 1:3,  2:10, 3:2,  4:9,  5:15, 6:11, 7:4,  8:8,  9:7  },
+        OCT: { 0:5,  1:14, 2:15, 3:7,  4:6,  5:8,  6:2,  7:13, 8:9,  9:1  },
+        NOV: { 0:13, 1:12, 2:2,  3:9,  4:5,  5:4,  6:11, 7:3,  8:6,  9:10 },
+        DIC: { 0:3,  1:15, 2:4,  3:11, 4:7,  5:10, 6:8,  7:2,  8:9,  9:14 }
+    }
+};
+
+const CALENDARIO_DPP_SENIAT = {
+    ENE: { 0:28, 1:19, 2:21, 3:30, 4:23, 5:22, 6:20, 7:27, 8:26, 9:29 },
+    FEB: { 0:20, 1:23, 2:18, 3:12, 4:25, 5:13, 6:19, 7:24, 8:26, 9:27 },
+    MAR: { 0:25, 1:20, 2:24, 3:23, 4:26, 5:30, 6:27, 7:18, 8:16, 9:17 },
+    ABR: { 0:23, 1:27, 2:21, 3:30, 4:20, 5:22, 6:24, 7:17, 8:29, 9:28 },
+    MAY: { 0:20, 1:18, 2:29, 3:22, 4:21, 5:28, 6:19, 7:26, 8:27, 9:25 },
+    JUN: { 0:29, 1:26, 2:16, 3:18, 4:19, 5:17, 6:30, 7:22, 8:23, 9:25 },
+    JUL: { 0:27, 1:21, 2:30, 3:23, 4:28, 5:22, 6:20, 7:16, 8:17, 9:29 },
+    AGO: { 0:17, 1:25, 2:24, 3:18, 4:19, 5:21, 6:28, 7:20, 8:26, 9:27 },
+    SEP: { 0:29, 1:18, 2:24, 3:21, 4:16, 5:25, 6:28, 7:22, 8:17, 9:23 },
+    OCT: { 0:20, 1:28, 2:29, 3:23, 4:22, 5:16, 6:21, 7:27, 8:26, 9:19 },
+    NOV: { 0:27, 1:26, 2:17, 3:23, 4:20, 5:18, 6:25, 7:19, 8:24, 9:16 },
+    DIC: { 0:16, 1:29, 2:21, 3:28, 4:22, 5:17, 6:15, 7:18, 8:30, 9:23 }
 };
 
 // Calendarios cacheados por año para no saturar la BD
@@ -104,9 +145,11 @@ function checkCompliance(rifStr, periodoStr, fechaPagoStr, rule = 'retenciones')
         }
 
         const monthStrLookup = months[dueMonth];
-        let localCal = _calendarCache[dueYear] || CALENDARIO_SENIAT;
-        if (!localCal[quincena] || !localCal[quincena][monthStrLookup]) return null;
-        dueDay = localCal[quincena][monthStrLookup][terminal];
+        let dbDay = null;
+        if (_calendarCache[dueYear] && _calendarCache[dueYear][quincena] && _calendarCache[dueYear][quincena][monthStrLookup]) {
+            dbDay = _calendarCache[dueYear][quincena][monthStrLookup][terminal];
+        }
+        dueDay = dbDay || CALENDARIO_SENIAT[quincena][monthStrLookup][terminal];
         if (!dueDay) return null; // Calendario incompleto
 
     } else if (rule === 'dpp') {
@@ -118,9 +161,11 @@ function checkCompliance(rifStr, periodoStr, fechaPagoStr, rule = 'retenciones')
         }
 
         const monthStrLookup = months[dueMonth];
-        let localCalDpp = _calendarDPPCache[dueYear];
-        if (!localCalDpp || !localCalDpp[monthStrLookup]) return null;
-        dueDay = localCalDpp[monthStrLookup][terminal];
+        let dbDay = null;
+        if (_calendarDPPCache[dueYear] && _calendarDPPCache[dueYear][monthStrLookup]) {
+            dbDay = _calendarDPPCache[dueYear][monthStrLookup][terminal];
+        }
+        dueDay = dbDay || CALENDARIO_DPP_SENIAT[monthStrLookup][terminal];
         if (!dueDay) return null;
     }
 
