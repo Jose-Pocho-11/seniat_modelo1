@@ -6,7 +6,7 @@ import sqlite3
 from init_db import init_db, DB_PATH
 import os
 import tempfile
-from reports_handler import generate_pdf_report, generate_word_report
+from reports_handler import generate_pdf_report
 
 app = Flask(__name__)
 app.secret_key = 'seniat_super_secret_key_123'
@@ -120,12 +120,14 @@ def usuarios():
 def reportes_pdf():
     user_id = session.get('user_id')
     is_admin = session.get('correo') == 'admin@seniat.gob.ve'
+    year = request.args.get('year')
+    month = request.args.get('month')
     
     # Create temp file
     temp_dir = tempfile.gettempdir()
     output_path = os.path.join(temp_dir, f'reporte_recaudacion_{user_id}.pdf')
     
-    generate_pdf_report(user_id, is_admin, output_path)
+    generate_pdf_report(user_id, is_admin, output_path, year, month)
     
     return send_file(output_path, as_attachment=True, download_name='Reporte_Recaudacion.pdf', mimetype='application/pdf')
 
@@ -135,24 +137,12 @@ def reportes_data():
     from reports_handler import get_report_data
     user_id = session.get('user_id')
     is_admin = session.get('correo') == 'admin@seniat.gob.ve'
+    year = request.args.get('year')
+    month = request.args.get('month')
     
     # Get raw data and convert any Row objects to dict so it's json serializable
-    data = get_report_data(user_id, is_admin)
+    data = get_report_data(user_id, is_admin, year, month)
     return jsonify(data), 200
-
-@app.route('/api/reportes/word')
-@login_required
-def reportes_word():
-    user_id = session.get('user_id')
-    is_admin = session.get('correo') == 'admin@seniat.gob.ve'
-    
-    # Create temp file
-    temp_dir = tempfile.gettempdir()
-    output_path = os.path.join(temp_dir, f'reporte_recaudacion_{user_id}.docx')
-    
-    generate_word_report(user_id, is_admin, output_path)
-    
-    return send_file(output_path, as_attachment=True, download_name='Reporte_Recaudacion.docx', mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
 @app.route('/api/contribuyentes', methods=['GET'])
 @login_required

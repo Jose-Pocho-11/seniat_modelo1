@@ -116,7 +116,7 @@
                     </button>
                     <div>
                         <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Módulo de Reportes</h2>
-                        <p class="text-sm font-medium text-slate-500">Genera informes oficiales detallados en formato PDF y Word.</p>
+                        <p class="text-sm font-medium text-slate-500">Genera informes oficiales y previsualiza la data recaudada.</p>
                     </div>
                 </div>
             </div>
@@ -124,43 +124,82 @@
 
         <!-- CONTENIDO SCROLLABLE -->
         <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
-            <div class="max-w-4xl mx-auto space-y-8">
+            <div class="max-w-5xl mx-auto space-y-8">
                 
+                <!-- Filtros y Descarga -->
                 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Descargar Reporte Consolidado</h3>
-                    <p class="text-slate-500 mb-8">El reporte incluye desglose por dependencia, bancos, tipos de impuestos, terminales de RIF y los principales contribuyentes registrados.</p>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Filtros y Reporte Consolidado</h3>
+                            <p class="text-slate-500">Filtra la información por período y obtén el documento oficial en PDF.</p>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Año</label>
+                                <select id="filterYear" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-32 p-2.5 font-medium transition-colors">
+                                    <option value="">Todos</option>
+                                    <option value="2025" selected>2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Mes</label>
+                                <select id="filterMonth" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-32 p-2.5 font-medium transition-colors">
+                                    <option value="">Todos</option>
+                                    <option value="1">Enero</option>
+                                    <option value="2">Febrero</option>
+                                    <option value="3">Marzo</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Mayo</option>
+                                    <option value="6">Junio</option>
+                                    <option value="7">Julio</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                            </div>
+                            <button onclick="loadReportData()" class="px-6 py-2.5 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-sm">
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
                     
-                    <!-- Fila de botones de descarga -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        
-                        <!-- PDF -->
-                        <div class="border border-slate-200 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-                            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-lg mb-2">Reporte en PDF</h4>
-                            <p class="text-sm text-slate-500 mb-6">Formato seguro y no editable, ideal para presentaciones y archivo oficial.</p>
-                            <a href="/api/reportes/pdf" class="inline-block w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
-                                Descargar PDF
-                            </a>
+                    <div class="pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <p class="text-sm text-slate-500 font-medium">El reporte PDF incluirá exclusivamente la información del período seleccionado.</p>
+                        <a id="btnDownloadPDF" href="/api/reportes/pdf?year=2025" class="inline-flex items-center gap-2 px-8 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Descargar PDF Oficial
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Indicadores (KPIs) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex items-center gap-6">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
-                        
-                        <!-- Word -->
-                        <div class="border border-slate-200 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-                            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-lg mb-2">Reporte en Word</h4>
-                            <p class="text-sm text-slate-500 mb-6">Formato editable (.docx) para que puedas anexar comentarios adicionales.</p>
-                            <a href="/api/reportes/word" class="inline-block w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors">
-                                Descargar Word
-                            </a>
+                        <div>
+                            <p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Monto Total Recaudado</p>
+                            <h3 id="kpiTotal" class="text-3xl font-black text-slate-800">Bs. 0,00</h3>
                         </div>
-                        
+                    </div>
+                    
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex items-center gap-6">
+                        <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Cantidad de Pagos</p>
+                            <h3 id="kpiPagos" class="text-3xl font-black text-slate-800">0</h3>
+                        </div>
                     </div>
                 </div>
 
@@ -176,19 +215,39 @@
                     <div id="previewContent" class="hidden space-y-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <!-- Gráfica Dependencias -->
-                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50">
+                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50 flex flex-col">
                                 <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Recaudación por Dependencia</h4>
-                                <div class="relative h-64">
+                                <div class="relative h-64 mb-4">
                                     <canvas id="chartDependencias"></canvas>
                                 </div>
+                                <div id="listDependencias" class="flex-1 overflow-y-auto max-h-48 space-y-2 text-sm mt-4 custom-scrollbar"></div>
                             </div>
                             
                             <!-- Gráfica Impuestos -->
-                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50">
+                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50 flex flex-col">
                                 <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Recaudación por Impuesto</h4>
-                                <div class="relative h-64">
+                                <div class="relative h-64 mb-4">
                                     <canvas id="chartImpuestos"></canvas>
                                 </div>
+                                <div id="listImpuestos" class="flex-1 overflow-y-auto max-h-48 space-y-2 text-sm mt-4 custom-scrollbar"></div>
+                            </div>
+
+                            <!-- Gráfica Bancos -->
+                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50 flex flex-col">
+                                <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Recaudación por Banco</h4>
+                                <div class="relative h-64 mb-4">
+                                    <canvas id="chartBancos"></canvas>
+                                </div>
+                                <div id="listBancos" class="flex-1 overflow-y-auto max-h-48 space-y-2 text-sm mt-4 custom-scrollbar"></div>
+                            </div>
+                            
+                            <!-- Gráfica Terminales -->
+                            <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50 flex flex-col">
+                                <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Recaudación por Terminal RIF</h4>
+                                <div class="relative h-64 mb-4">
+                                    <canvas id="chartTerminales"></canvas>
+                                </div>
+                                <div id="listTerminales" class="flex-1 overflow-y-auto max-h-48 space-y-2 text-sm mt-4 custom-scrollbar"></div>
                             </div>
                         </div>
                     </div>
@@ -199,15 +258,38 @@
     </main>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+let chartsInstances = {};
+
+function formatBs(n) {
+    return "Bs. " + new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+}
+
+async function loadReportData() {
+    document.getElementById('previewLoader').classList.remove('hidden');
+    document.getElementById('previewContent').classList.add('hidden');
+
+    const year = document.getElementById('filterYear').value;
+    const month = document.getElementById('filterMonth').value;
+
+    let downloadUrl = '/api/reportes/pdf?';
+    if (year) downloadUrl += `year=${year}&`;
+    if (month) downloadUrl += `month=${month}`;
+    document.getElementById('btnDownloadPDF').href = downloadUrl;
+
     try {
-        const response = await fetch('/api/reportes/data');
+        let apiUrl = '/api/reportes/data?';
+        if (year) apiUrl += `year=${year}&`;
+        if (month) apiUrl += `month=${month}`;
+
+        const response = await fetch(apiUrl);
         const data = await response.json();
         
         document.getElementById('previewLoader').classList.add('hidden');
         document.getElementById('previewContent').classList.remove('hidden');
         
-        // Setup Charts
+        document.getElementById('kpiTotal').textContent = formatBs(data.total);
+        document.getElementById('kpiPagos').textContent = new Intl.NumberFormat('es-VE').format(data.cantidad_de_pagos);
+        
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -215,50 +297,92 @@ document.addEventListener('DOMContentLoaded', async () => {
                 legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { family: "'Inter', sans-serif" } } }
             }
         };
-        
-        // Dependencias Chart
-        const depData = data.dependencias.slice(0,5);
-        new Chart(document.getElementById('chartDependencias'), {
-            type: 'doughnut',
-            data: {
-                labels: depData.map(d => d.nombre.length > 15 ? d.nombre.substring(0,12)+'...' : d.nombre),
-                datasets: [{
-                    data: depData.map(d => d.monto),
-                    backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: { ...commonOptions, cutout: '70%' }
-        });
-        
-        // Impuestos Chart
-        const impData = data.impuestos.slice(0,5);
-        new Chart(document.getElementById('chartImpuestos'), {
-            type: 'bar',
-            data: {
-                labels: impData.map(d => d.nombre.length > 15 ? d.nombre.substring(0,12)+'...' : d.nombre),
-                datasets: [{
-                    label: 'Monto (Bs)',
-                    data: impData.map(d => d.monto),
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 6
-                }]
-            },
-            options: { 
-                ...commonOptions,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
-                    x: { grid: { display: false } }
+
+        const createDoughnut = (id, dataSlice, colors) => {
+            if (chartsInstances[id]) chartsInstances[id].destroy();
+            const ctx = document.getElementById(id);
+            if(!ctx) return;
+            chartsInstances[id] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: dataSlice.map(d => d.nombre && d.nombre.length > 15 ? d.nombre.substring(0,12)+'...' : d.nombre),
+                    datasets: [{
+                        data: dataSlice.map(d => d.monto),
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...commonOptions, cutout: '65%' }
+            });
+        };
+
+        const createBar = (id, labels, dataVals, color) => {
+            if (chartsInstances[id]) chartsInstances[id].destroy();
+            const ctx = document.getElementById(id);
+            if(!ctx) return;
+            chartsInstances[id] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Monto (Bs)',
+                        data: dataVals,
+                        backgroundColor: color,
+                        borderRadius: 6
+                    }]
+                },
+                options: { 
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                        x: { grid: { display: false } }
+                    }
                 }
-            }
-        });
+            });
+        };
         
+        const renderList = (id, items, labelKey, valueKey) => {
+            const container = document.getElementById(id);
+            if (!container) return;
+            container.innerHTML = '';
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center py-1 border-b border-slate-200/50 last:border-0';
+                
+                let labelText = item[labelKey] || 'N/A';
+                if (labelKey === 'terminal') labelText = 'Terminal ' + labelText;
+                
+                row.innerHTML = `
+                    <span class="text-slate-600 font-medium truncate pr-4" title="${labelText}">${labelText}</span>
+                    <span class="text-slate-800 font-bold whitespace-nowrap">${formatBs(item[valueKey])}</span>
+                `;
+                container.appendChild(row);
+            });
+        };
+
+        createDoughnut('chartDependencias', data.dependencias.slice(0,5), ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']);
+        renderList('listDependencias', data.dependencias, 'nombre', 'monto');
+        
+        createDoughnut('chartBancos', data.bancos.slice(0,5), ['#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#3b82f6']);
+        renderList('listBancos', data.bancos, 'nombre', 'monto');
+
+        const impData = data.impuestos.slice(0,5);
+        createBar('chartImpuestos', impData.map(d => d.nombre && d.nombre.length > 15 ? d.nombre.substring(0,12)+'...' : d.nombre), impData.map(d => d.monto), '#3b82f6');
+        renderList('listImpuestos', data.impuestos, 'nombre', 'monto');
+        
+        const termData = data.terminales;
+        createBar('chartTerminales', termData.map(d => 'Terminal ' + d.terminal), termData.map(d => d.monto), '#10b981');
+        renderList('listTerminales', data.terminales, 'terminal', 'monto');
+
     } catch (error) {
         document.getElementById('previewLoader').innerHTML = '<p class="text-red-500 font-bold text-center">Error cargando previsualización.</p>';
+        console.error(error);
     }
-});
+}
+
+document.addEventListener('DOMContentLoaded', loadReportData);
 </script>
 </body>
 </html>
