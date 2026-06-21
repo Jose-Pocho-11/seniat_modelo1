@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seniat Control - Métricas de Comportamiento</title>
+    
+    <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+    
+    <!-- FUENTE INTER LOCAL -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
+    
+    <!-- ESTILOS PERSONALIZADOS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="flex min-h-screen overflow-hidden">
+
+    <!-- BACKDROP SIDEBAR RESPONSIVE -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out" style="width: 320px;">
+        <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+        <div class="p-8 border-b border-slate-100">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-24">
+                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-indigo-600">Control</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+@login_required
+def directorio():
+    return render_template('directorio.html', current_user=session.get('user_nombre'))
+
+@app.route('/historial')
+@login_required
+def historial():
+  
+                    <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        Directorio
+                    </a>
+                    <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Historial de Lotes
+                    </a>
+                    <a href="/reportes" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.4
+                        Gestión de Usuarios
+                    </a>
+                </div>
+                <button onclick="clearDatabase()" class="group cursor-pointer block w-full">
+                    <div class="bg-red-50 border-2 border-dashed border-red-200 hover:border-red-500 p-4 rounded-2xl text-center transition-all">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </div>
+                        <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+                    </div>
+                </button>
+            </section>
+            {% endif %}
+        </div>
+
+        <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+                    {{ current_user[0] if current_user else 'U' }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
+                </div>
+            </div>
+            <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </a>
+        </div>
+    </aside>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const resizer = document.getElementById('resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            if (newWidth < 200) newWidth = 200;
+            if (newWidth > 800) newWidth = 800;
+            sidebar.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+            }
+        });
+    </script>
+
+    <!-- METRICS VIEW -->
+    <main id="view-metrics" class="flex-1 bg-slate-50/50 p-4 lg:p-10 h-screen overflow-y-auto custom-scrollbar relative w-full">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <header class="flex items-center lg:items-end justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-white transition-all shrink-0 bg-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                        <p class="text-sm text-slate-500">Selecciona una fecha para ver qué terminales de RIF deben declarar sus impuestos correspondientes al mes anterior.</p>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Fecha Objetivo</label>
+                            <input type="date" id="calendarDate" onchange="checkSelectedDate()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none font-bold text-slate-700">
+                        </div>
+                        <button onclick="checkSelectedDate()" class="mt-5 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-md shadow-blue-600/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico de Resultados -->
+                <div>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Terminales con Vencimiento</h4>
+                    <div id="dueTerminalsContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[140px]">
+                        <!-- Rellenado por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLAS DE CALENDARIO -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                <!-- Tabla Quincena 1 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.1) Entre los días 01 al 15 de cada mes, ambos inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ1"></div>
+                    </div>
+                </div>
+                
+                <!-- Tabla Quincena 2 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.2) Entre los días 16 y el último de cada mes, ambos inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ2"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-8 mt-8">
+                <!-- Tabla DPP -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">Anticipos ISLR / DPP (Mensual):</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableDPP"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FILTROS GLOBALES -->
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm mt-8">
+                <h3 class="font-black text-lg text-slate-800 mb-6">Filtros de Análisis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
+                        <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                            <option value="">Todos</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Mes</label>
+                        <select id="metricMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                            <option value="">Todos</option>
+                            <option value="0">Enero</option>
+                            <option value="1">Febrero</option>
+                            <option value="2">Marzo</option>
+                            <option value="3">Abril</option>
+                            <option value="4">Mayo</option>
+                            <option value="5">Junio</option>
+                            <option value="6">Julio</option>
+                            <option value="7">Agosto</option>
+                            <option value="8">Septiembre</option>
+                            <option value="9">Octubre</option>
+                            <option value="10">Noviembre</option>
+                            <option value="11">Diciembre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o Dependencia</label>
+                        <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Tipos de Impuestos</label>
+
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">5</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><spa
+                </div>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIONES DE ANÁLISIS DISTINTAS -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                <!-- SECCIÓN 1: MÉTRICAS DPP -->
+                <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-md shadow-blue-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            </div>
+                </div>
+            </div>
+
+            <!-- SECCIONES DE ANÁLISIS DISTINTAS -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                <!-- SECCIÓN 1: MÉTRICAS DPP -->
+                <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-md shadow-blue-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-xl text-slate-800">Análisis: DPP</h3>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anticipos ISLR y Pensiones (Mensual)</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-8">Esta sección evalúa exclusivamente el cumplimiento de los anticipos contra el calendario mensual propio de DPP, considerando los filtros globales aplicados.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                A Tiempo
+                            </p>
+                            <h3 id="kpiATiempoDpp" class="text-5xl font-black text-green-600 drop-shadow-sm">0%</h3>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                Retrasado
+                            </p>
+                            <h3 id="kpiRetrasoDpp" class="text-5xl font-black text-red-500 drop-shadow-sm">0%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: MÉTRICAS OTROS IMPUESTOS -->
+                <div class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-md shadow-indigo-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T9</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="comparisonBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- Lógica de Calendario en la propia vista para evitar problemas de caché -->
+    <script>
+        let CALENDARIO_SENIAT_LOCAL = {
+            1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
+            2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+        };
+        let CALENDARIO_DPP_LOCAL = { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] };
+        const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+        
+        async function fetchCalendar(year) {
+            try {
+                const response = await fetch(`/api/calendario/${year}`);
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T7</span></label>
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T8</span></label>
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T9</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="comparisonBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    cell.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+                }
+            });
+        }
+
+        function selectCellDate(quincena, monthStr, terminal, day, type = 'Retenciones') {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const monthIdx = months.indexOf(monthStr);
+            
+            // Si hay una fecha ya seleccionada en el input, usar ese año
+            const dateInput = document.getElementById('calendarDate');
+            let year = new Date().getFullYear();
+            if (dateInput && dateInput.value) {
+                year = dateInput.value.split('-')[0];
+            }
+            
+            const yyyy = year;
+            const mm = String(monthIdx + 1).padStart(2, '0');
+            const dd = String(day).padStart(2, '0');
+            
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+                checkSelectedDate();
+            }
+        }
+
+        function buildCalendarTable(quincena) {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            let html = `
+                <table class="w-full text-center text-xs border-collapse border border-slate-300 table-fixed">
+                    <thead class="bg-blue-50 text-[10px] font-black text-slate-700">
+                        <tr>
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table>`;
+            return html;
+        }
+
+        function renderUI() {
+            if(document.getElementById('tableQ1')) document.getElementById('tableQ1').innerHTML = buildCalendarTable(1);
+            if(document.getElementById('tableQ2')) document.getElementById('tableQ2').innerHTML = buildCalendarTable(2);
+            if(document.getElementById('tableDPP')) document.getElementById('tableDPP').innerHTML = buildCalendarDPPTable();
+            checkSelectedDate();
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            const dateInput = document.getElementById('calendarDate');
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            
+            // Fetch initial calendar
+            await fetchCalendar(yyyy);
+            renderUI();
+        });
+
+        // Detect if user changes the year in the date picker, fetch new calendar
+        let lastCalendarYear = null;
+        document.getElementById('calendarDate')?.addEventListener('change', async (e) => {
+            const year = e.target.value.split('-')[0];
+            if (year && year !== lastCalendarYear) {
+                lastCalendarYear = year;
+                await fetchCalendar(year);
+                renderUI();
+            }
+        });
+    </script>
+</body>
+</html>
+
+    <div id="metricsDetailModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative border border-slate-100">
+            <!-- Header Modal -->
+            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 id="metricsDetailTitle" class="text-xl font-black text-slate-800">Detalle de Contribuyentes</h3>
+                    <p id="metricsDetailCount" class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">0 Contribuyentes</p>
+                </div>
+                <button onclick="closeMetricsDetailModal()" class="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <!-- Body Modal (Tabla) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-white">
+                <div class="border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Dependencia</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Impuesto</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Período</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Forma</th>
+                        <tbody id="metricsDetailTableBody" class="divide-y divide-slate-50">
+                            <!-- JS inyecta filas aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Footer Modal -->
+            <div class="px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
+                <button onclick="closeMetricsDetailModal()" class="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA PRINCIPAL (con versión para forzar recarga) -->
+    <script src="/static/js/app.js?v=2.2"></script>
+</body>
+</html>
+
+        
+        if existing:
+            ignored += 1
+            continue
+            
+        conn.execute('''
+            INSERT INTO recaudaciones (
+                id, dependencia_id, codigo_control, codigo_subtipo, codigo_area, banco_id, tipo_documento_id, impuesto_id,
+                rif, razon_social, periodo, numero_documento, monto, fecha_recaudacion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            current_carga, dep_id, cod_forma, '', '', banco_id, doc_id, imp_id,
+            rif, razon_social, periodo, num_doc, monto, fecha_rec
+        ))
+        inserted += 1
+        
+    conn.execute('UPDATE historial_lotes SET cantidad_registros = ? WHERE id = ?', (inserted, current_carga))
+    conn.commit()
+    conn.close()
+    return inserted, ignored
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    files = request.files.getlist('file')
+    action = request.form.get('action', 'read')
+    
+    if not files or files[0].filename == '':
+        return jsonify({"error": "No se seleccionó ningún archivo"}), 400
+        
+    result, status_code = process_files(files)
+    
+    # Si todo salió bien y la acción es guardar en BD
+    if status_code == 200 and action == 'save' and 'data' in result:
+        inserted, ignored = save_to_database(result['data'], session['user_id'])
+        result['message'] = "Se guardaron exitosamente"
+        
+    return jsonify(result), status_code
+
+if __name__ == '__main__':
+    # Ejecuta el servidor Flask en modo debug para desarrollo
+    app.run(debug=True, port=5000)
+

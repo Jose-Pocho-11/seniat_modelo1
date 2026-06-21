@@ -1,0 +1,138 @@
+<script>
+let CALENDARIO_SENIAT_LOCAL = {
+            1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
+            2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+        };
+        let CALENDARIO_DPP_LOCAL = { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] };
+        const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+        
+        async function fetchCalendar(year) {
+            try {
+                const response = await fetch(`/api/calendario/${year}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!data.is_empty) {
+                        CALENDARIO_SENIAT_LOCAL = data.calendario;
+                    }
+                }
+                
+                const responseDpp = await fetch(`/api/calendario_dpp/${year}`);
+                if (responseDpp.ok) {
+                    const dataDpp = await responseDpp.json();
+                    if (!dataDpp.is_empty) {
+                        CALENDARIO_DPP_LOCAL = dataDpp.calendario_dpp;
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener los calendarios:", error);
+            }
+        }
+
+        function getDueTerminalsForDate(targetDate) {
+            const dueDay = targetDate.getDate();
+            const monthIdx = targetDate.getMonth();
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            
+            const targetMonthStr = months[monthIdx];
+            
+            let pMonthIdx = monthIdx - 1;
+            if (pMonthIdx < 0) pMonthIdx = 11;
+            const periodMonthStr = months[pMonthIdx];
+            
+            const results = [];
+            
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_SENIAT_LOCAL[1][targetMonthStr] && parseInt(CALENDARIO_SENIAT_LOCAL[1][targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 1, dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'Retenciones' });
+                }
+            }
+            
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_SENIAT_LOCAL[2][targetMonthStr] && parseInt(CALENDARIO_SENIAT_LOCAL[2][targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 2, dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'Retenciones' });
+                }
+            }
+            
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_DPP_LOCAL[targetMonthStr] && parseInt(CALENDARIO_DPP_LOCAL[targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 'DPP', dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'DPP' });
+                }
+            }
+            
+            return results;
+        }
+
+        function checkSelectedDate() {
+            const dateInput = document.getElementById('calendarDate');
+            if (!dateInput || !dateInput.value) return;
+            
+            const parts = dateInput.value.split('-');
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            
+            const dueTerminals = getDueTerminalsForDate(selectedDate);
+            const container = document.getElementById('dueTerminalsContainer');
+            if (!container) return;
+            
+            document.querySelectorAll('.highlighted-cell').forEach(cell => {
+                cell.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+            });
+            
+            if (dueTerminals.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-slate-500 font-bold">
+                        No hay vencimientos programados para esta fecha.
+                    </div>
+                `;
+            } else {
+                container.innerHTML = dueTerminals.map(item => `
+                    <div class="bg-blue-600 text-white rounded-2xl p-6 shadow-lg shadow-blue-600/30 flex flex-col items-center justify-center transform transition-all hover:scale-105 relative">
+                        <span class="absolute top-2 right-2 text-[8px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase">${item.type}</span>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-blue-200 mb-1">Terminal</span>
+                        <span class="text-6xl font-black">${item.terminal}</span>
+                        <span class="text-xs text-blue-100 mt-3 bg-blue-700/50 px-3 py-1 rounded-full text-center">
+                            Período: ${item.periodMonthStr} ${item.type === 'DPP' ? '' : `(Q${item.quincena})`}
+                        </span>
+                    </div>
+                `).join('');
+            }
+            
+            dueTerminals.forEach(item => {
+                const cellId = item.type === 'DPP' ? `cell-dpp-${item.dueMonthStr}-${item.terminal}` : `cell-${item.quincena}-${item.dueMonthStr}-${item.terminal}`;
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    cell.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+                }
+            });
+        }
+
+        
+window.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            const dateInput = document.getElementById('calendarDate');
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            
+            // Fetch initial calendar
+            await fetchCalendar(yyyy);
+            renderUI();
+        });
+
+        // Detect if user changes the year in the date picker, fetch new calendar
+        let lastCalendarYear = null;
+        document.getElementById('calendarDate')?.addEventListener('change', async (e) => {
+            const year = e.target.value.split('-')[0];
+            if (year && year !== lastCalendarYear) {
+                lastCalendarYear = year;
+                await fetchCalendar(year);
+                renderUI();
+            }
+        });
+
+        // ============================================
+        
+</script>

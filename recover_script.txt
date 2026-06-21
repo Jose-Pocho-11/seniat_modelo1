@@ -1,0 +1,99 @@
+<script>
+        let CALENDARIO_SENIAT_LOCAL = {
+            1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
+            2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+        };
+        let CALENDARIO_DPP_LOCAL = { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] };
+        const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+        
+        async function fetchCalendar(year) {
+            try {
+                const response = await fetch(`/api/calendario/${year}`);
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T7</span></label>
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T8</span></label>
+                                <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="comp-target-cb w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" onchange="if(typeof renderComparisonChart === 'function') renderComparisonChart()"><span class="text-xs font-bold text-slate-700">T9</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="comparisonBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    cell.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+                }
+            });
+        }
+
+        function selectCellDate(quincena, monthStr, terminal, day, type = 'Retenciones') {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const monthIdx = months.indexOf(monthStr);
+            
+            // Si hay una fecha ya seleccionada en el input, usar ese año
+            const dateInput = document.getElementById('calendarDate');
+            let year = new Date().getFullYear();
+            if (dateInput && dateInput.value) {
+                year = dateInput.value.split('-')[0];
+            }
+            
+            const yyyy = year;
+            const mm = String(monthIdx + 1).padStart(2, '0');
+            const dd = String(day).padStart(2, '0');
+            
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+                checkSelectedDate();
+            }
+        }
+
+        function buildCalendarTable(quincena) {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            let html = `
+                <table class="w-full text-center text-xs border-collapse border border-slate-300 table-fixed">
+                    <thead class="bg-blue-50 text-[10px] font-black text-slate-700">
+                        <tr>
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table>`;
+            return html;
+        }
+
+        function renderUI() {
+            if(document.getElementById('tableQ1')) document.getElementById('tableQ1').innerHTML = buildCalendarTable(1);
+            if(document.getElementById('tableQ2')) document.getElementById('tableQ2').innerHTML = buildCalendarTable(2);
+            if(document.getElementById('tableDPP')) document.getElementById('tableDPP').innerHTML = buildCalendarDPPTable();
+            checkSelectedDate();
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            const dateInput = document.getElementById('calendarDate');
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            
+            // Fetch initial calendar
+            await fetchCalendar(yyyy);
+            renderUI();
+        });
+
+        // Detect if user changes the year in the date picker, fetch new calendar
+        let lastCalendarYear = null;
+        document.getElementById('calendarDate')?.addEventListener('change', async (e) => {
+            const year = e.target.value.split('-')[0];
+            if (year && year !== lastCalendarYear) {
+                lastCalendarYear = year;
+                await fetchCalendar(year);
+                renderUI();
+            }
+        });
+    </script>

@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for
+from flask import Flask, render_template, request, jsonify, redirect, session, url_for, send_file
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from data_handler import process_files
 import sqlite3
 from init_db import init_db, DB_PATH
+import os
+import tempfile
+from reports_handler import generate_pdf_report
 
 app = Flask(__name__)
 app.secret_key = 'seniat_super_secret_key_123'
@@ -43,6 +46,103 @@ def directorio():
 @login_required
 def historial():
     return render_template('historial.html', current_user=session.get('user_nombre'))
+
+@app.route('/calendario')
+@login_required
+def calendario():
+    return render_template('calendario.html', current_user=session.get('user_nombre'))
+
+@app.route('/api/calendario/<int:year>', methods=['GET'])
+@login_required
+def get_calendar(year):
+    from data_handler import get_calendar_for_year
+    calendar_data, is_empty = get_calendar_for_year(year)
+    return jsonify({"calendario": calendar_data, "is_empty": is_empty}), 200
+
+@app.route('/api/calendario', methods=['POST'])
+@login_required
+def save_calendar():
+    from data_handler import save_calendar_days
+    data = request.json
+    anio = data.get('anio')
+    mes = data.get('mes')
+    quincena = data.get('quincena')
+    dias = data.get('dias') # List of 10 items (for terminals 0-9)
+    
+    if not all([anio, mes, quincena, dias]) and not dias == []:
+        return jsonify({"error": "Faltan datos"}), 400
+        
+    try:
+        save_calendar_days(anio, mes, quincena, dias)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/calendario_dpp/<int:year>', methods=['GET'])
+@login_required
+def get_calendar_dpp(year):
+    from data_handler import get_calendar_dpp_for_year
+    calendar_data, is_empty = get_calendar_dpp_for_year(year)
+    return jsonify({"calendario_dpp": calendar_data, "is_empty": is_empty}), 200
+
+@app.route('/api/calendario_dpp', methods=['POST'])
+@login_required
+def save_calendar_dpp():
+    from data_handler import save_calendar_dpp_days
+    data = request.json
+    anio = data.get('anio')
+    mes = data.get('mes')
+    dias = data.get('dias') # List of 10 items (for terminals 0-9)
+    
+    if not all([anio, mes, dias]) and not dias == []:
+        return jsonify({"error": "Faltan datos"}), 400
+        
+    try:
+        save_calendar_dpp_days(anio, mes, dias)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/reportes')
+@login_required
+def reportes():
+    return render_template('reportes.html', current_user=session.get('user_nombre'))
+
+@app.route('/usuarios')
+@login_required
+def usuarios():
+    if session.get('correo') != 'admin@seniat.gob.ve':
+        return redirect(url_for('index'))
+    return render_template('usuarios.html', current_user=session.get('user_nombre'))
+
+@app.route('/api/reportes/pdf')
+@login_required
+def reportes_pdf():
+    user_id = session.get('user_id')
+    is_admin = session.get('correo') == 'admin@seniat.gob.ve'
+    year = request.args.get('year')
+    month = request.args.get('month')
+    
+    # Create temp file
+    temp_dir = tempfile.gettempdir()
+    output_path = os.path.join(temp_dir, f'reporte_recaudacion_{user_id}.pdf')
+    
+    generate_pdf_report(user_id, is_admin, output_path, year, month)
+    
+    return send_file(output_path, as_attachment=True, download_name='Reporte_Recaudacion.pdf', mimetype='application/pdf')
+
+@app.route('/api/reportes/data', methods=['GET'])
+@login_required
+def reportes_data():
+    from reports_handler import get_report_data
+    user_id = session.get('user_id')
+    is_admin = session.get('correo') == 'admin@seniat.gob.ve'
+    year = request.args.get('year')
+    month = request.args.get('month')
+    
+    # Get raw data and convert any Row objects to dict so it's json serializable
+    data = get_report_data(user_id, is_admin, year, month)
+    return jsonify(data), 200
 
 @app.route('/api/contribuyentes', methods=['GET'])
 @login_required
@@ -143,7 +243,6 @@ def get_contribuyentes():
             r.dependencia_id, r.codigo_control, r.banco_id, r.tipo_documento_id, 
             r.impuesto_id, r.rif, r.razon_social, r.periodo, r.numero_documento, 
             r.monto, r.fecha_recaudacion
-        LIMIT 100
     '''
     
     contribuyentes = conn.execute(base_query, params).fetchall()
@@ -185,6 +284,18 @@ def get_filtros_opciones():
         "bancos": bancos,
         "documentos": documentos
     }), 200
+
+@app.route('/api/usuarios', methods=['GET'])
+@login_required
+def get_usuarios():
+    if session.get('correo') != 'admin@seniat.gob.ve':
+        return jsonify({"error": "No autorizado"}), 403
+        
+    conn = get_db_connection()
+    usuarios = conn.execute('SELECT id, nombre, apellido, cedula, correo FROM usuarios').fetchall()
+    conn.close()
+    
+    return jsonify([dict(row) for row in usuarios]), 200
 
 @app.route('/api/contribuyentes', methods=['POST'])
 @login_required
@@ -430,6 +541,31 @@ def get_lotes():
     conn.close()
     return jsonify([dict(row) for row in lotes]), 200
 
+@app.route('/api/clear_db', methods=['POST'])
+@login_required
+def clear_db():
+    if session.get('correo') != 'admin@seniat.gob.ve':
+        return jsonify({"error": "No autorizado"}), 403
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('PRAGMA foreign_keys = OFF;')
+        conn.execute('DELETE FROM recaudaciones;')
+        conn.execute('DELETE FROM historial_lotes;')
+        conn.execute('DELETE FROM dependencias;')
+        conn.execute('DELETE FROM bancos;')
+        conn.execute('DELETE FROM tipos_documento;')
+        conn.execute('DELETE FROM tipos_impuesto;')
+        conn.execute('PRAGMA foreign_keys = ON;')
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+        
+    conn.close()
+    return jsonify({"success": True, "message": "Base de datos limpiada exitosamente"}), 200
+
 def save_to_database(parsed_data, user_id):
     conn = get_db_connection()
     bancos_cache = {}
@@ -438,15 +574,16 @@ def save_to_database(parsed_data, user_id):
     impuestos_cache = {}
     
     def get_or_create_banco(codigo, nombre):
-        if codigo in bancos_cache: return bancos_cache[codigo]
-        b = conn.execute('SELECT id FROM bancos WHERE codigo_banco = ?', (codigo,)).fetchone()
+        cache_key = f"{codigo}_{nombre}"
+        if cache_key in bancos_cache: return bancos_cache[cache_key]
+        b = conn.execute('SELECT id FROM bancos WHERE codigo_banco = ? OR nombre_banco = ?', (codigo, nombre)).fetchone()
         if b:
-            bancos_cache[codigo] = b['id']
+            bancos_cache[cache_key] = b['id']
             return b['id']
         conn.execute('INSERT INTO bancos (codigo_banco, nombre_banco) VALUES (?, ?)', (codigo, nombre))
         conn.commit()
         b_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-        bancos_cache[codigo] = b_id
+        bancos_cache[cache_key] = b_id
         return b_id
         
     def get_or_create_dependencia(nombre):
@@ -476,7 +613,7 @@ def save_to_database(parsed_data, user_id):
     def get_or_create_impuesto(nombre):
         if nombre in impuestos_cache: return impuestos_cache[nombre]
         # Usamos el nombre también como código temporalmente ya que viene junto en el reporte
-        i = conn.execute('SELECT id FROM tipos_impuesto WHERE codigo_impuesto = ?', (nombre,)).fetchone()
+        i = conn.execute('SELECT id FROM tipos_impuesto WHERE codigo_impuesto = ? OR nombre_impuesto = ?', (nombre, nombre)).fetchone()
         if i:
             impuestos_cache[nombre] = i['id']
             return i['id']

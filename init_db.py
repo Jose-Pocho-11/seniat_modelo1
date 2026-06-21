@@ -2,8 +2,7 @@ import sqlite3
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DESKTOP_DIR = os.path.dirname(BASE_DIR)
-DB_FOLDER = os.path.join(DESKTOP_DIR, 'Seniat_DB')
+DB_FOLDER = os.path.join(BASE_DIR, 'Seniat_DB')
 DB_PATH = os.path.join(DB_FOLDER, 'seniat.db')
 
 def init_db():
@@ -99,6 +98,27 @@ def init_db():
         fecha_carga DATETIME DEFAULT CURRENT_TIMESTAMP,
         cantidad_registros INTEGER NOT NULL,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- 9. TABLA: calendarios
+    CREATE TABLE IF NOT EXISTS calendarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        anio INTEGER NOT NULL,
+        mes TEXT NOT NULL,
+        quincena INTEGER NOT NULL,
+        terminal_rif INTEGER NOT NULL,
+        dia_vencimiento INTEGER NOT NULL,
+        UNIQUE(anio, mes, quincena, terminal_rif)
+    );
+
+    -- 10. TABLA: calendarios_dpp
+    CREATE TABLE IF NOT EXISTS calendarios_dpp (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        anio INTEGER NOT NULL,
+        mes TEXT NOT NULL,
+        terminal_rif INTEGER NOT NULL,
+        dia_vencimiento INTEGER NOT NULL,
+        UNIQUE(anio, mes, terminal_rif)
     );
     """
     

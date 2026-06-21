@@ -1,5 +1,5 @@
 Columnas detectadas:
-['0', '1', '2', '3', '4']
+['Código Forma', 'Forma', 'Código Dependencia', 'Dependencia', 'Código Banco', 'Banco', 'Tipo de Documento', 'Impuesto', 'RIF', 'Razón Social', 'Período', 'Número de Documento', 'RIF.1', 'Monto', 'Fechas de Recaudación']
 
 Primera fila:
-{'0': 'FECHA', '1': 'HORA', '2': 'DESCRIPCIÓN DEL MOVIMIENTO', '3': 'IMPORTE', '4': 'DIVISA'}
+{'Código Forma': 'Código Forma', 'Forma': 'Forma', 'Código Dependencia': 'Código Dependencia', 'Dependencia': 'Dependencia', 'Código Banco': 'Código Banco', 'Banco': 'Banco', 'Tipo de Documento': 'Tipo de Documento', 'Impuesto': 'Impuesto', 'RIF': 'RIF', 'Razón Social': 'Razón Social', 'Período': 'Período', 'Número de Documento': 'Número de Documento', 'RIF.1': 'RIF.1', 'Monto': 'Monto', 'Fechas de Recaudación': 'Fecha de Recaudación'}

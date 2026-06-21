@@ -1,33 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seniat Control - Métricas de Comportamiento</title>
-    
+
     <!-- LIBRERÍAS LOCALES (Funciona sin Internet) -->
-    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
-    
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=1.9" defer></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+
     <!-- FUENTE INTER LOCAL -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/inter-font.css') }}">
-    
+
     <!-- ESTILOS PERSONALIZADOS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="flex min-h-screen overflow-hidden">
+
+<body
+    class="flex min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50/20 to-blue-50/40 text-slate-800">
+
+    <!-- BACKDROP SIDEBAR RESPONSIVE -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-30 relative shrink-0" style="width: 320px;">
-        <div id="resizer" class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40"></div>
+    <aside id="sidebar"
+        class="bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:sticky top-0 h-screen shrink-0 transition-transform duration-300 ease-in-out"
+        style="width: 320px;">
+        <div id="resizer"
+            class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400 active:bg-blue-600 transition-colors z-40">
+        </div>
         <div class="p-8 border-b border-slate-100">
             <div class="flex flex-col items-center text-center gap-3">
                 <div class="w-24">
-                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo" class="w-full h-auto drop-shadow-md">
+                    <img src="{{ url_for('static', filename='img/logo_seniat.png') }}" alt="Seniat Logo"
+                        class="w-full h-auto drop-shadow-md">
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span class="text-indigo-600">Control</span></h1>
+                    <h1 class="font-extrabold text-xl tracking-tighter text-slate-800">Seniat <span
+                            class="text-indigo-600">Control</span></h1>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Panel Administrativo</p>
                 </div>
             </div>
@@ -37,38 +52,139 @@
             <section>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Vistas</h3>
                 <div class="space-y-2">
-                    <a href="/" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    <a href="/"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
                         Dashboard Principal
                     </a>
-                    <a href="/metricas" class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-50 text-indigo-700 font-bold transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    <a href="/metricas"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 text-blue-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
                         Métricas de Comportamiento
                     </a>
-                    <a href="/directorio" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+
+
+                    <a href="/calendario"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendario Fiscal
+                    </a>
+
+
+                    <a href="/directorio"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
                         Directorio
                     </a>
-                    <a href="/historial" class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <a href="/historial"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Historial de Lotes
+                    </a>
+                    <a href="/reportes"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Generación de Reportes
                     </a>
                 </div>
             </section>
+            {% if session.get('correo') == 'admin@seniat.gob.ve' %}
+            <section class="mt-8">
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Administración</h3>
+                <div class="space-y-2 mb-4">
+                    <a href="/usuarios"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Gestión de Usuarios
+                    </a>
+                </div>
+                <button onclick="clearDatabase()" class="group cursor-pointer block w-full">
+                    <div
+                        class="bg-red-50 border-2 border-dashed border-red-200 hover:border-red-500 p-4 rounded-2xl text-center transition-all">
+                        <div
+                            class="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-red-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-bold text-red-900 leading-tight">Limpiar Base de Datos</p>
+                    </div>
+                </button>
+            </section>
+            {% endif %}
+
+            <section>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Acciones</h3>
+                <label id="openUploadModalBtn" class="group cursor-pointer block">
+                    <div
+                        class="bg-blue-50 border-2 border-dashed border-blue-200 hover:border-blue-500 p-6 rounded-2xl text-center transition-all">
+                        <div
+                            class="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-blue-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-bold text-blue-900 leading-tight">Cargar nuevo CSV / Excel</p>
+                    </div>
+                </label>
+
+            </section>
+
+
         </div>
 
         <div class="p-6 border-t border-slate-100 mt-auto flex justify-between items-center">
             <div class="flex items-center gap-3 overflow-hidden">
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
+                <div
+                    class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shadow-inner shrink-0">
                     {{ current_user[0] if current_user else 'U' }}
                 </div>
                 <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis" title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else 'Invitado' }}</p>
+                    <p class="text-xs font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis"
+                        title="{{ current_user if current_user else 'Invitado' }}">{{ current_user if current_user else
+                        'Invitado' }}</p>
                     <p class="text-[10px] font-bold text-slate-400 italic">Modo Operativo</p>
                 </div>
             </div>
-            <a href="/logout" title="Cerrar Sesión" class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <a href="/logout" title="Cerrar Sesión"
+                class="text-slate-400 hover:text-red-500 transition-colors p-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
             </a>
         </div>
     </aside>
@@ -100,29 +216,99 @@
         });
     </script>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <!-- METRICS VIEW -->
-    <main id="view-metrics" class="flex-1 bg-slate-50/50 p-10 h-screen overflow-y-auto custom-scrollbar relative">
+    <main id="view-metrics"
+        class="flex-1 bg-slate-50/50 p-4 lg:p-10 h-screen overflow-y-auto custom-scrollbar relative w-full">
         <div class="max-w-7xl mx-auto space-y-8">
-            <header class="flex items-end justify-between">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Métricas de Comportamiento</h2>
-                    <p class="text-slate-500 mt-1 font-medium">Análisis avanzado de tendencias y comportamientos de contribuyentes.</p>
+            <header class="flex items-center lg:items-end justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button onclick="toggleSidebar()"
+                        class="lg:hidden text-slate-400 hover:text-indigo-600 p-2 rounded-lg border border-slate-100 hover:bg-white transition-all shrink-0 bg-white">
+
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+
+                            Métricas y Cumplimiento
+                        </h1>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Análisis de recaudación y cumplimiento de
+                            obligaciones tributarias.</p>
+                    </div>
                 </div>
-                <button onclick="loadMockData()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1 transition-all text-sm flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                    Generar Datos de Prueba
-                </button>
             </header>
-            
-            <!-- FILTROS Y KPIS -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Filtros Locales de Métricas -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm col-span-1 space-y-4">
-                    <h3 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Filtros de Análisis</h3>
-                    
+            <!-- PANEL DE VENCIMIENTOS -->
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm mt-8">
+                <div
+                    class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-slate-100 pb-8">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800 mb-2">Vencimientos por Fecha</h3>
+                        <p class="text-sm text-slate-500">Selecciona una fecha para ver qué terminales de RIF deben
+                            declarar sus impuestos correspondientes al mes anterior.</p>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Fecha Objetivo</label>
+                            <input type="date" id="calendarDate" onchange="checkSelectedDate()"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none font-bold text-slate-700">
+                        </div>
+                        <button onclick="checkSelectedDate()"
+                            class="mt-5 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-md shadow-blue-600/20">
+
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico de Resultados -->
+                <div>
+                    <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-4">Terminales con
+                        Vencimiento</h4>
+                    <div id="dueTerminalsContainer"
+                        class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 min-h-[140px]">
+                        <!-- Rellenado por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLAS DE CALENDARIO -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                <!-- Tabla Quincena 1 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.1) Entre los días 01 al 15 de cada mes, ambos
+                        inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ1"></div>
+                    </div>
+                </div>
+
+                <!-- Tabla Quincena 2 -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">a.2) Entre los días 16 y el último de cada mes,
+                        ambos inclusive:</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableQ2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8 mt-8">
+                <!-- Tabla DPP -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h4 class="font-black text-lg text-slate-800 mb-2">DPP (Mensual):</h4>
+                    <div class="overflow-x-auto mt-6">
+                        <div id="tableDPP"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTROS GLOBALES -->
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm mt-8">
+                <h3 class="font-black text-lg text-slate-800 mb-6">Filtros de Análisis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="space-y-2 group">
                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Año Fiscal</label>
-                        <select id="metricYear" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                        <select id="metricYear"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
                             <option value="">Todos</option>
                             <option value="2023">2023</option>
                             <option value="2024">2024</option>
@@ -133,7 +319,8 @@
 
                     <div class="space-y-2 group">
                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Mes</label>
-                        <select id="metricMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+                        <select id="metricMonth"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
                             <option value="">Todos</option>
                             <option value="0">Enero</option>
                             <option value="1">Febrero</option>
@@ -150,102 +337,720 @@
                         </select>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Terminales RIF (Último número)</label>
-                        <div class="grid grid-cols-5 gap-2">
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">0</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="1" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">1</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">2</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">3</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">4</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">5</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">6</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">7</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">8</span></label>
-                            <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9" class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" checked><span class="text-xs font-bold text-slate-700">9</span></label>
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Región o
+                            Dependencia</label>
+                        <div id="dependencia-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 group">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Tipos de
+                            Impuestos</label>
+                        <div id="impuesto-filters" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar p-1">
                         </div>
                     </div>
                 </div>
 
-                <!-- Resumen KPIs -->
-                <div class="col-span-1 lg:col-span-2 grid grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-3xl border border-blue-100 shadow-sm flex flex-col justify-center">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Pagos A Tiempo (Global)</p>
-                        <h3 id="kpiATiempo" class="text-4xl font-black text-blue-600">0%</h3>
-                        <p class="text-xs text-slate-400 mt-2">Cumplimiento del calendario fiscal para los filtros actuales</p>
+                <div class="mt-6 space-y-2 border-t border-slate-100 pt-6">
+                    <div class="flex items-center gap-4 ml-1 mb-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Terminales RIF (Último
+                            número)</label>
+                        <button onclick="toggleAllTerminals('metric-terminal')"
+                            class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest transition-colors cursor-pointer">Alternar
+                            Todos</button>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pagos con Retraso (Global)</p>
-                        <h3 id="kpiRetraso" class="text-4xl font-black text-slate-700">0%</h3>
-                        <p class="text-xs text-slate-400 mt-2">Pagos después del límite para los filtros actuales</p>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="0"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">0</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="1"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">1</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="2"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">2</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="3"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">3</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="4"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">4</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="5"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">5</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="6"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">6</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="7"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">7</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="8"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">8</span></label>
+                        <label class="flex flex-col items-center gap-1 cursor-pointer"><input type="checkbox" value="9"
+                                class="metric-terminal w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                checked><span class="text-xs font-bold text-slate-700">9</span></label>
                     </div>
                 </div>
             </div>
 
-            <!-- CHART AREA -->
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <h4 class="font-black text-xs text-slate-400 uppercase tracking-widest mb-6">Porcentaje de Pagos al Día por Terminal</h4>
-                <div class="chart-container" style="height: 350px;">
-                    <canvas id="metricsBarChart"></canvas>
+            <!-- SECCIONES DE ANÁLISIS Y GRÁFICAS -->
+            <div class="grid grid-cols-1 gap-8 mt-8">
+
+                <!-- 1. SECCIÓN: MÉTRICAS OTROS IMPUESTOS -->
+                <div
+                    class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-md shadow-indigo-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div>
+                                <h3 class="font-black text-xl text-slate-800">Análisis: Otros Impuestos</h3>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Retenciones
+                                    (Quincenal)</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-8">Esta sección evalúa el cumplimiento de retenciones (IVA,
+                            etc) contra el calendario quincenal general, considerando los filtros aplicados.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div
+                            class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p
+                                class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+
+                                A Tiempo
+                            </p>
+                            <h3 id="kpiATiempoOtros"
+                                class="text-5xl font-black text-green-600 drop-shadow-sm cursor-pointer hover:text-green-500 transition-colors"
+                                onclick="openMetricsDetailModal('otros', 'a_tiempo')" title="Ver detalles">0%</h3>
+                        </div>
+                        <div
+                            class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p
+                                class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+
+                                Retrasado
+                            </p>
+                            <h3 id="kpiRetrasoOtros"
+                                class="text-5xl font-black text-red-500 drop-shadow-sm cursor-pointer hover:text-red-400 transition-colors"
+                                onclick="openMetricsDetailModal('otros', 'retrasado')" title="Ver detalles">0%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Gráfica de Métricas Otros Impuestos -->
+                <div class="bg-white p-8 rounded-3xl border border-indigo-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h4 class="font-black text-lg text-slate-800">Cumplimiento por Terminal (Otros Impuestos)</h4>
+                        <div class="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar
+                                Meses</label>
+                            <div class="flex flex-wrap gap-1.5" id="compareMonthsOtrosContainer">
+                                <label class="cursor-pointer"><input type="checkbox" value="0"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ene</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="1"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Feb</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="2"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Mar</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="3"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Abr</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="4"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        May</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="5"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jun</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="6"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jul</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="7"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ago</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="8"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Sep</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="9"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Oct</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="10"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Nov</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="11"
+                                        class="peer sr-only compare-month-otros-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Dic</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-80 w-full">
+                        <canvas id="metricsBarChartOtros"></canvas>
+                    </div>
+                </div>
+
+                <!-- 3. SECCIÓN: MÉTRICAS DPP -->
+                <div
+                    class="bg-white p-8 rounded-3xl border border-blue-200 shadow-md shadow-blue-100 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div>
+                                <h3 class="font-black text-xl text-slate-800">Análisis: DPP</h3>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anticipos ISLR
+                                    y Pensiones (Mensual)</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-8">Esta sección evalúa exclusivamente el cumplimiento de los
+                            anticipos contra el calendario mensual propio de DPP, considerando los filtros globales
+                            aplicados.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div
+                            class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p
+                                class="text-xs font-bold text-green-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+
+                                A Tiempo
+                            </p>
+                            <h3 id="kpiATiempoDpp"
+                                class="text-5xl font-black text-green-600 drop-shadow-sm cursor-pointer hover:text-green-500 transition-colors"
+                                onclick="openMetricsDetailModal('dpp', 'a_tiempo')" title="Ver detalles">0%</h3>
+                        </div>
+                        <div
+                            class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <p
+                                class="text-xs font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+
+                                Retrasado
+                            </p>
+                            <h3 id="kpiRetrasoDpp"
+                                class="text-5xl font-black text-red-500 drop-shadow-sm cursor-pointer hover:text-red-400 transition-colors"
+                                onclick="openMetricsDetailModal('dpp', 'retrasado')" title="Ver detalles">0%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Gráfica de Métricas DPP -->
+                <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h4 class="font-black text-lg text-slate-800">Cumplimiento por Terminal (DPP)</h4>
+                        <div class="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase shrink-0">Comparar
+                                Meses</label>
+                            <div class="flex flex-wrap gap-1.5" id="compareMonthsDppContainer">
+                                <label class="cursor-pointer"><input type="checkbox" value="0"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ene</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="1"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Feb</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="2"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Mar</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="3"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Abr</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="4"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        May</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="5"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jun</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="6"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Jul</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="7"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Ago</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="8"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Sep</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="9"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Oct</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="10"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Nov</div>
+                                </label>
+                                <label class="cursor-pointer"><input type="checkbox" value="11"
+                                        class="peer sr-only compare-month-dpp-checkbox">
+                                    <div
+                                        class="rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:bg-slate-200 transition-all duration-200">
+                                        Dic</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-80 w-full">
+                        <canvas id="metricsBarChartDpp"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Detalles de Métricas -->
+    <div id="metricsDetailModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div
+            class="bg-white rounded-[2rem] shadow-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative border border-slate-100">
+            <!-- Header Modal -->
+            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 id="metricsDetailTitle" class="text-2xl font-black text-slate-800 tracking-tight">Detalles de
+                        Métrica</h3>
+                    <p id="metricsDetailSubtitle" class="text-sm text-slate-500 font-medium mt-1">Listado de
+                        contribuyentes</p>
+                </div>
+                <button onclick="closeMetricsDetailModal()"
+                    class="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 p-2 rounded-full transition-colors border border-slate-200 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="px-8 py-3 bg-white border-b border-slate-100 flex justify-end shrink-0">
+                <button onclick="exportMetricsDetailToCSV()"
+                    class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors border border-green-200 shadow-sm cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar a Excel
+                </button>
+            </div>
+
+            <!-- Body Modal (Tabla) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-white">
+                <div class="border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Forma
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Forma</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Dep</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Dependencia
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Cód Banco
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Banco</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Tipo Doc
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Impuesto
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF
+                                    Retenedor</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Razón Social
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Período</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Nro Doc</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">RIF
+                                    Contribuyente</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Límite
+                                </th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">
+                                    Monto</th>
+                                <th class="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">Fecha Pago
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="metricsDetailTableBody">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- DATOS DE PRUEBA (MOCK DATA) -->
+
+
+    <!-- MODAL DETALLES -->
+    <div id="detailModal"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 hidden items-center justify-center p-4 transition-all duration-300">
+        <div
+            class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.15)] border border-white/50 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+            <div
+                class="p-6 border-b border-slate-100/50 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-indigo-50/30">
+                <h3 id="modalTitle"
+                    class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-indigo-800 tracking-tight">
+                    Detalles</h3>
+                <button onclick="closeModal()"
+                    class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-all">
+
+                </button>
+            </div>
+            <div id="modalContent" class="p-8 overflow-y-auto flex-1 custom-scrollbar">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT IS INCLUDED IN HEAD -->
+
+    <!-- Modal de Carga de Archivos -->
+    <div id="uploadModal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+            id="uploadModalContent">
+
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h2 class="text-lg font-extrabold text-slate-800">Cargar Archivos de Recaudación</h2>
+                <button id="closeUploadModalBtn" class="text-slate-400 hover:text-slate-600 transition-colors">
+
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-8">
+                <label id="dropZone" class="group cursor-pointer block">
+                    <div
+                        class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-8 text-center transition-all bg-slate-50 group-hover:bg-blue-50">
+                        <div
+                            class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 group-hover:text-blue-500 shadow-sm transition-colors">
+
+                        </div>
+                        <p class="text-base font-bold text-slate-700 mb-1">Arrastra tus archivos aquí</p>
+                        <p class="text-xs text-slate-500">o haz clic para explorar en tu equipo</p>
+                        <p class="text-[10px] text-slate-400 mt-4 uppercase font-bold tracking-widest">Soporta: .CSV,
+                            .XLSX, .XLS</p>
+                        <input type="file" id="csvFileInput" class="hidden" accept=".csv, .xlsx, .xls" multiple>
+                    </div>
+                </label>
+
+                <!-- Selected Files List -->
+                <div id="fileListContainer" class="hidden mt-6 space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
+                    <!-- Files injected by JS -->
+                </div>
+
+                <!-- Processing State -->
+                <div id="uploadProgress" class="hidden mt-6 text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+                    <p id="uploadStatusText" class="text-sm font-bold text-blue-600">Procesando archivos...</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-slate-100 flex gap-3 bg-slate-50">
+                <button id="btnReadFiles"
+                    class="flex-1 bg-white border-2 border-blue-200 text-blue-700 font-bold py-3 px-4 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    Solo Visualizar
+                </button>
+                <button id="btnSaveFiles"
+                    class="flex-1 bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    Guardar en Base de Datos
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Script Principal -->
+    <script src="/static/js/app.js?v=2.1"></script>
+
     <script>
-        function loadMockData() {
-            console.log("Generando mock data...");
-            const mockData = [];
-            for (let i = 0; i < 800; i++) {
-                const term = Math.floor(Math.random() * 10);
-                const month = Math.floor(Math.random() * 12) + 1;
-                const year = [2023, 2024, 2025][Math.floor(Math.random() * 3)];
-                
-                const periodo = `01/${month.toString().padStart(2, '0')}/${year}`;
-                
-                const isLate = Math.random() > 0.65; // ~65% a tiempo
-                let paymentDay = isLate ? 28 : 5; 
-                
-                let pMonth = month;
-                let pYear = year;
-                if (isLate && month === 12) {
-                    pMonth = 1;
-                    pYear = year + 1;
-                } else if (isLate) {
-                    pMonth = month + 1;
+        let CALENDARIO_SENIAT_LOCAL = {
+            1: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] },
+            2: { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] }
+        };
+        let CALENDARIO_DPP_LOCAL = { ENE: [], FEB: [], MAR: [], ABR: [], MAY: [], JUN: [], JUL: [], AGO: [], SEP: [], OCT: [], NOV: [], DIC: [] };
+        const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+        async function fetchCalendar(year) {
+            try {
+                const response = await fetch(`/api/calendario/${year}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!data.is_empty) {
+                        CALENDARIO_SENIAT_LOCAL = data.calendario;
+                    }
                 }
-                
-                const fechaRec = `${paymentDay.toString().padStart(2, '0')}/${pMonth.toString().padStart(2, '0')}/${pYear}`;
-                
-                mockData.push({
-                    "RIF": `J-1234567${term}-${term}`,
-                    "Período": periodo,
-                    "Fechas de Recaudación": fechaRec,
-                    "Monto": (Math.random() * 5000).toFixed(2).replace('.', ','),
-                    "Dependencia": "Capital",
-                    "Impuesto": "IVA",
-                    "Razón Social": "Empresa Simulada " + i
-                });
-            }
-            appData = mockData;
-            
-            if (typeof updateUI === 'function') {
-                updateUI();
-                alert("¡Datos de prueba generados con éxito!");
-            } else {
-                alert("Error: updateUI no está disponible.");
+
+                const responseDpp = await fetch(`/api/calendario_dpp/${year}`);
+                if (responseDpp.ok) {
+                    const dataDpp = await responseDpp.json();
+                    if (!dataDpp.is_empty) {
+                        CALENDARIO_DPP_LOCAL = dataDpp.calendario_dpp;
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener los calendarios:", error);
             }
         }
-        
-        // Auto-generar después de 1 segundo si no hay datos
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                if (appData && appData.length === 0) {
-                    loadMockData();
+
+        function getDueTerminalsForDate(targetDate) {
+            const dueDay = targetDate.getDate();
+            const monthIdx = targetDate.getMonth();
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+            const targetMonthStr = months[monthIdx];
+
+            let pMonthIdx = monthIdx - 1;
+            if (pMonthIdx < 0) pMonthIdx = 11;
+            const periodMonthStr = months[pMonthIdx];
+
+            const results = [];
+
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_SENIAT_LOCAL[1][targetMonthStr] && parseInt(CALENDARIO_SENIAT_LOCAL[1][targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 1, dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'Retenciones' });
                 }
-            }, 1000);
+            }
+
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_SENIAT_LOCAL[2][targetMonthStr] && parseInt(CALENDARIO_SENIAT_LOCAL[2][targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 2, dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'Retenciones' });
+                }
+            }
+
+            for (let t = 0; t <= 9; t++) {
+                if (CALENDARIO_DPP_LOCAL[targetMonthStr] && parseInt(CALENDARIO_DPP_LOCAL[targetMonthStr][t]) === dueDay) {
+                    results.push({ terminal: t, quincena: 'DPP', dueMonthStr: targetMonthStr, periodMonthStr: periodMonthStr, type: 'DPP' });
+                }
+            }
+
+            return results;
+        }
+
+        function checkSelectedDate() {
+            const dateInput = document.getElementById('calendarDate');
+            if (!dateInput || !dateInput.value) return;
+
+            const parts = dateInput.value.split('-');
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+            const dueTerminals = getDueTerminalsForDate(selectedDate);
+            const container = document.getElementById('dueTerminalsContainer');
+            if (!container) return;
+
+            document.querySelectorAll('.highlighted-cell').forEach(cell => {
+                cell.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+            });
+
+            if (dueTerminals.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-slate-500 font-bold">
+                        No hay vencimientos programados para esta fecha.
+                    </div>
+                `;
+            } else {
+                container.innerHTML = dueTerminals.map(item => `
+                    <div class="bg-blue-600 text-white rounded-2xl p-6 shadow-lg shadow-blue-600/30 flex flex-col items-center justify-center transform transition-all hover:scale-105 relative">
+                        <span class="absolute top-2 right-2 text-[8px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase">${item.type}</span>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-blue-200 mb-1">Terminal</span>
+                        <span class="text-6xl font-black">${item.terminal}</span>
+                        <span class="text-xs text-blue-100 mt-3 bg-blue-700/50 px-3 py-1 rounded-full text-center">
+                            Período: ${item.periodMonthStr} ${item.type === 'DPP' ? '' : `(Q${item.quincena})`}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            dueTerminals.forEach(item => {
+                const cellId = item.type === 'DPP' ? `cell-dpp-${item.dueMonthStr}-${item.terminal}` : `cell-${item.quincena}-${item.dueMonthStr}-${item.terminal}`;
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    cell.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'highlighted-cell');
+                }
+            });
+        }
+
+        function selectCellDate(quincena, monthStr, terminal, day, type = 'Retenciones') {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const monthIdx = months.indexOf(monthStr);
+
+            // Si hay una fecha ya seleccionada en el input, usar ese año
+            const dateInput = document.getElementById('calendarDate');
+            let year = new Date().getFullYear();
+            if (dateInput && dateInput.value) {
+                year = dateInput.value.split('-')[0];
+            }
+
+            const yyyy = year;
+            const mm = String(monthIdx + 1).padStart(2, '0');
+            const dd = String(day).padStart(2, '0');
+
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+                checkSelectedDate();
+            }
+        }
+
+        function buildCalendarTable(quincena) {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            let html = `
+                <table class="w-full text-center text-xs border-collapse border border-slate-300 table-fixed">
+                    <thead class="bg-blue-50 text-[10px] font-black text-slate-700">
+                        <tr>
+                            <th class="px-1 py-1.5 border border-slate-300 w-10">R.I.F</th>
+            `;
+
+            for (const month of months) {
+                html += `<th class="px-1 py-1.5 border border-slate-300">${month}</th>`;
+            }
+
+            html += `
+                        </tr>
+                    </thead>
+                    <tbody class="font-medium text-slate-700 bg-white">
+            `;
+
+            for (let t = 0; t <= 9; t++) {
+                html += `<tr><td class="px-1 py-2 bg-blue-50/50 font-black border border-slate-200 text-blue-800">${t}</td>`;
+                for (const month of months) {
+                    const day = CALENDARIO_SENIAT_LOCAL[quincena][month] ? CALENDARIO_SENIAT_LOCAL[quincena][month][t] : '';
+                    const displayDay = day ? (parseInt(day) < 10 ? '0' + parseInt(day) : day) : '-';
+                    html += `<td class="px-1 py-2 border border-slate-200 hover:bg-blue-100/50 transition-colors cursor-pointer text-slate-600" ${day ? `onclick="selectCellDate(${quincena}, '${month}', ${t}, ${day})"` : ''} id="cell-${quincena}-${month}-${t}">${displayDay}</td>`;
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table>`;
+            return html;
+        }
+
+        function buildCalendarDPPTable() {
+            const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            let html = `
+                <table class="w-full text-center text-xs border-collapse border border-slate-300 table-fixed">
+                    <thead class="bg-blue-50 text-[10px] font-black text-slate-700">
+                        <tr>
+                            <th class="px-1 py-1.5 border border-slate-300 w-10">R.I.F</th>
+            `;
+            for (const month of months) {
+                html += `<th class="px-1 py-1.5 border border-slate-300">${month}</th>`;
+            }
+            html += `</tr></thead><tbody class="font-medium text-slate-700 bg-white">`;
+            for (let t = 0; t <= 9; t++) {
+                html += `<tr><td class="px-1 py-2 bg-blue-50/50 font-black border border-slate-200 text-blue-800">${t}</td>`;
+                for (const month of months) {
+                    const day = CALENDARIO_DPP_LOCAL[month] ? CALENDARIO_DPP_LOCAL[month][t] : '';
+                    const displayDay = day ? (parseInt(day) < 10 ? '0' + parseInt(day) : day) : '-';
+                    html += `<td class="px-1 py-2 border border-slate-200 hover:bg-blue-100/50 transition-colors cursor-pointer text-slate-600" ${day ? `onclick="selectCellDate('DPP', '${month}', ${t}, ${day}, 'DPP')"` : ''} id="cell-dpp-${month}-${t}">${displayDay}</td>`;
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table>`;
+            return html;
+        }
+
+        function renderUI() {
+            if (document.getElementById('tableQ1')) document.getElementById('tableQ1').innerHTML = buildCalendarTable(1);
+            if (document.getElementById('tableQ2')) document.getElementById('tableQ2').innerHTML = buildCalendarTable(2);
+            if (document.getElementById('tableDPP')) document.getElementById('tableDPP').innerHTML = buildCalendarDPPTable();
+            checkSelectedDate();
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+
+            const dateInput = document.getElementById('calendarDate');
+            if (dateInput) {
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+
+            // Fetch initial calendar
+            await fetchCalendar(yyyy);
+            renderUI();
         });
+
+        // Detect if user changes the year in the date picker, fetch new calendar
+        let lastCalendarYear = null;
+        document.getElementById('calendarDate')?.addEventListener('change', async (e) => {
+            const year = e.target.value.split('-')[0];
+            if (year && year !== lastCalendarYear) {
+                lastCalendarYear = year;
+                await fetchCalendar(year);
+                renderUI();
+            }
+        });
+
+        // ============================================
+
     </script>
 </body>
+
 </html>

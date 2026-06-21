@@ -1,0 +1,4 @@
+No se encontraron encabezados. Aquí están las primeras 30 filas parseadas:
+Empty DataFrame
+Columns: [(Detalle dado una Unidad de Adscripción y/o un Banco y/o una Forma y/o un RIF, (Fecha Reporte: Miércoles, 17/06/2026 11:24))]
+Index: []
