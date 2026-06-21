@@ -917,7 +917,6 @@ const metricYearListener = document.getElementById('metricYear');
 if (metricYearListener) metricYearListener.addEventListener('change', async () => {
     if (metricYearListener.value) {
         await fetchCalendarForYear(metricYearListener.value);
-        // Pre-cargar el calendario del año siguiente por declaraciones como DPP que vencen el próximo año
         await fetchCalendarForYear((parseInt(metricYearListener.value) + 1).toString());
     }
     updateUI();
